@@ -1,0 +1,72 @@
+<?php
+
+return [
+    'settings' => 'Settings',
+    'exit' => 'Exit',
+    'logout' => 'Log Out',
+    'profile' => 'Profile',
+    'profile_subheading' => 'Update your name and email address',
+    'password' => 'Password',
+    'two_factor_auth' => 'Two-Factor Auth',
+    'profile_and_account_settings' => 'Manage your profile and account settings',
+
+    // Common fields/actions
+    'name' => 'Name',
+    'email' => 'Email',
+    'you' => 'You',
+    'created_at' => 'Created At',
+    'actions' => 'Actions',
+    'save' => 'Save',
+    'saved' => 'Saved.',
+    'cancel' => 'Cancel',
+    'close' => 'Close',
+    'back' => 'Back',
+    'confirm' => 'Confirm',
+    'continue' => 'Continue',
+    'edit' => 'Edit',
+
+
+    // Appearance
+    'appearance' => 'Appearance',
+    'appearance_subheading' => 'Update the appearance settings for your account',
+
+    // Theme options
+    'light' => 'Light',
+    'dark' => 'Dark',
+    'system' => 'System',
+
+    // Email verification messages
+    'unverified_email' => 'Your email address is unverified.',
+    'resend_verification' => 'Click here to re-send the verification email.',
+    'verification_link_sent' => 'A new verification link has been sent to your email address.',
+
+    // Password page
+    'update_password' => 'Update password',
+    'password_subheading' => 'Ensure your account is using a long, random password to stay secure',
+    'current_password' => 'Current password',
+    'new_password' => 'New password',
+    'confirm_password' => 'Confirm Password',
+
+    // Delete account
+    'delete_account' => 'Delete account',
+    'delete_account_subheading' => 'Delete your account and all of its resources',
+    'delete_account_confirm_heading' => 'Are you sure you want to delete your account?',
+    'delete_account_confirm_text' => 'Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.',
+
+    // Two-Factor Authentication
+    'two_factor_subheading' => 'Manage your two-factor authentication settings',
+    'enabled' => 'Enabled',
+    'disabled' => 'Disabled',
+    'tfa_enabled_text' => 'With two-factor authentication enabled, you will be prompted for a secure, random pin during login, which you can retrieve from the TOTP-supported application on your phone.',
+    'disable_2fa' => 'Disable 2FA',
+    'tfa_disabled_text' => 'When you enable two-factor authentication, you will be prompted for a secure pin during login. This pin can be retrieved from a TOTP-supported application on your phone.',
+    'enable_2fa' => 'Enable 2FA',
+    'tfa_setup_failed' => 'Failed to fetch setup data.',
+    'tfa_verify_title' => 'Verify Authentication Code',
+    'tfa_verify_desc' => 'Enter the 6-digit code from your authenticator app.',
+    'tfa_enable_title' => 'Enable Two-Factor Authentication',
+    'tfa_enable_desc' => 'To finish enabling two-factor authentication, scan the QR code or enter the setup key in your authenticator app.',
+    'enter_code_manually' => 'or, enter the code manually',
+
+    'no_records_found' => 'No records found.',
+];
