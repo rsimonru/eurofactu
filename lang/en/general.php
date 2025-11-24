@@ -9,13 +9,18 @@ return [
     'password' => 'Password',
     'two_factor_auth' => 'Two-Factor Auth',
     'profile_and_account_settings' => 'Manage your profile and account settings',
+    'more_info' => 'More info',
 
     // Common fields/actions
     'name' => 'Name',
     'email' => 'Email',
     'you' => 'You',
     'created_at' => 'Created At',
+    'active' => 'Active',
     'actions' => 'Actions',
+    'new' => 'New',
+    'search' => 'Search',
+    'select' => 'Select',
     'save' => 'Save',
     'saved' => 'Saved.',
     'cancel' => 'Cancel',
@@ -24,6 +29,11 @@ return [
     'confirm' => 'Confirm',
     'continue' => 'Continue',
     'edit' => 'Edit',
+    'date' => 'Date',
+    'state' => 'State',
+    'are_you_sure' => 'Are you sure?',
+    'confirm_delete' => 'Are you sure you want to delete this record? This action cannot be undone.',
+    'delete' => 'Delete',
 
 
     // Appearance

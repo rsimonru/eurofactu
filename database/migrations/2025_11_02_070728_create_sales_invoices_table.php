@@ -33,7 +33,7 @@ return new class extends Migration
             $table->string('province', 75);
             $table->foreignId('country_id')->constrained('countries');
             $table->string('phone', 25)->nullable();
-            $table->text('email')->nullable();
+            $table->string('email', 255)->nullable();
 
             $table->foreignId('bank_account_id')->nullable()->constrained('banks_accounts');
             $table->text('observations')->nullable();
@@ -42,6 +42,8 @@ return new class extends Migration
             $table->json('verifactu_data')->nullable();
 
             $table->timestamps();
+            $table->foreignId('created_by')->nullable()->constrained('users');
+            $table->foreignId('updated_by')->nullable()->constrained('users');
             $table->softDeletes();
         });
     }

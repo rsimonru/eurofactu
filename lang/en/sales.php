@@ -1,0 +1,63 @@
+<?php
+    return [
+        'sales' => 'Sale|Sales',
+        'budgets' => 'Budget|Budgets',
+        'orders' => 'Order|Orders',
+        'notes' => 'Note|Notes',
+        'invoices' => 'Invoice|Invoices',
+        'lines' => 'Line|Lines',
+
+        // Budgets
+        'create_budget' => 'Create Budget',
+        'edit_budget' => 'Edit Budget',
+        'search_budgets' => 'Search budgets',
+        'budget_created' => 'Budget created successfully',
+        'budget_updated' => 'Budget updated successfully',
+        'budget_lines_placeholder' => 'Budget lines will be available after creating the budget',
+
+        // Fields
+        'number' => 'Number',
+        'fiscal_year' => 'Fiscal Year',
+        'customer' => 'Customer',
+        'company' => 'Company',
+        'total' => 'Total',
+        'base' => 'Base',
+        'recipient' => 'Recipient',
+        'reference' => 'Reference',
+        'observations' => 'Observations',
+        'internal_note' => 'Internal Note',
+        'valid_until' => 'Valid Until',
+        'sent_date' => 'Sent Date',
+        'vat' => 'VAT',
+        'legal_form' => 'Legal Form',
+        'address' => 'Address',
+        'zip' => 'ZIP Code',
+        'town' => 'Town',
+        'province' => 'Province',
+        'phone' => 'Phone',
+        'lines' => 'Lines',
+        'customer_data' => 'Customer Data',
+
+        // Line fields
+        'description' => 'Description',
+        'units' => 'Units',
+        'price_unit' => 'Price/Unit',
+        'discount' => 'Disc',
+        'tax' => 'VAT',
+        'subtotal' => 'Subtotal',
+        'taxes' => 'Taxes',
+        'documents' => 'Documents',
+        'add_line' => 'Add Line',
+        'line_created' => 'Line created successfully',
+        'line_updated' => 'Line updated successfully',
+        'line_deleted' => 'Line deleted successfully',
+        'no_lines' => 'No lines added',
+        'save_budget_first' => 'You must save the budget before adding lines',
+
+        // Placeholders
+        'enter_number' => 'Enter number',
+        'enter_recipient' => 'Enter recipient',
+        'enter_reference' => 'Enter reference',
+        'enter_observations' => 'Enter observations',
+        'enter_internal_note' => 'Enter internal note',
+    ];

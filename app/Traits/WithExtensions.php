@@ -40,16 +40,16 @@ trait WithExtensions
         }
     }
 
-    public static function getModelData($oQuery, $iModel_id, $iRecordsInPage = 0, $aWithDerived = [], $paginatorName = 'page', $keyBy = 'id') {
+    public static function getModelData($oQuery, $iModel_id, $records_in_page = 0, $aWithDerived = [], $paginatorName = 'page', $keyBy = 'id') {
 
         if (!empty($aWithDerived)) {
             $oQuery->with($aWithDerived);
         }
         if ($iModel_id == 0) {
-            //$iRecordsInPage = ($iRecordsInPage <= 0 || empty($iRecordsInPage)) ? config('constants.pagination.DEFAULT_PAGE_RECORDS') : $iRecordsInPage;
-            $iRecordsInPage = ($iRecordsInPage == 0 ) ? config('constants.pagination.DEFAULT_PAGE_RECORDS') : $iRecordsInPage;
-            if ($iRecordsInPage>0) {
-                $oRecords = $oQuery->paginate($iRecordsInPage, ['*'], $paginatorName);
+            //$records_in_page = ($records_in_page <= 0 || empty($records_in_page)) ? config('constants.pagination.DEFAULT_PAGE_RECORDS') : $records_in_page;
+            $records_in_page = ($records_in_page == 0 ) ? config('constants.pagination.DEFAULT_PAGE_RECORDS') : $records_in_page;
+            if ($records_in_page>0) {
+                $oRecords = $oQuery->paginate($records_in_page, ['*'], $paginatorName);
                 $oRecordsC = $oRecords->getCollection()->keyBy($keyBy);
                 $oRecords->setCollection($oRecordsC);
             } else {

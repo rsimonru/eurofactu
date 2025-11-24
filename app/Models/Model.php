@@ -37,14 +37,16 @@ class Model extends LaravelModel
             }
         }
         if ($do_log) {
-            LocalLog::create([
-                'procedure' => get_class($this).'::save',
-                'data' => [
-                    'original' => $this->getOriginal(),
-                    'changes' => $this->getDirty(),
-                ],
-                'created_user' => auth()->user()->id ?? null,
-            ]);
+            if(config('database.debug') == 'mysql') {
+                LocalLog::create([
+                    'procedure' => get_class($this).'::save',
+                    'data' => [
+                        'original' => $this->getOriginal(),
+                        'changes' => $this->getDirty(),
+                    ],
+                    'created_user' => auth()->user()->id ?? null,
+                ]);
+            }
         }
         parent::save($options); // Calls Default Save
     }
@@ -54,13 +56,15 @@ class Model extends LaravelModel
     public function delete ($do_log = true)
     {
         if ($do_log) {
-            LocalLog::create([
-                'procedure' => get_class($this).'::delete',
-                'data' => [
-                    'id' => $this->id,
-                ],
-                'created_user' => auth()->user()->id ?? null,
-            ]);
+            if(config('database.debug') == 'mysql') {
+                LocalLog::create([
+                    'procedure' => get_class($this).'::delete',
+                    'data' => [
+                        'id' => $this->id,
+                    ],
+                    'created_user' => auth()->user()->id ?? null,
+                ]);
+            }
         }
 
         if (array_key_exists('updated_user', $this->attributes) && empty($this->updated_user)) {

@@ -62,6 +62,11 @@ class Select extends Model
                     ->orderBy('companies.name', 'asc')
                     ->get()->toArray();
                 break;
+            case "countries":
+                $oSelect = Country::select('countries.id as value', 'countries.name->'.app()->getLocale().' as option')
+                    ->orderByRaw('countries.name->"$.'.app()->getLocale().'" asc')
+                    ->get()->toArray();
+                break;
             case "dates_expenses":
                 $oSelect = [
                     ["value" => 'date', "option" => __('generic.invoice_date')],
@@ -116,8 +121,8 @@ class Select extends Model
                     ->get()->toArray();
                 break;
             case "tax_types":
-                $oSelect = TaxType::select('id as value', 'type as option')
-                    ->orderBy('type', 'asc')
+                $oSelect = TaxType::select('value as value', 'type as option')
+                    ->orderBy('order', 'asc')
                     ->get()->toArray();
                 break;
             case "thirdparties":

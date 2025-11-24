@@ -36,7 +36,7 @@ class Permission extends SpatiePermission
         ->when($model_id>0, function($query) use ($model_id) {
             return $query->where('permissions.id', $model_id);
         })
-        ->where('permissions.level', '<=', auth()->user()->level)
+        ->where('permissions.level', '<=', auth()->user()->level->id)
         ->when(isset($filters['class']) && !empty($filters['class']), function($query) use ($filters) {
             return $query->where('permissions.class', $filters['class']);
         })

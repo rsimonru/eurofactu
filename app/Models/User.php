@@ -77,7 +77,7 @@ class User extends Authenticatable
      * Get users
      *
      * @param int $iModels_id
-     * @param int $iRecordsInPage
+     * @param int $records_in_page
      * @param array $aSort (attribute => 'asc'/'desc')
      * @param array $filters
      * @return mixed Collection

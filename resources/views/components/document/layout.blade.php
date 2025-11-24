@@ -3,9 +3,8 @@
     'records' => null,
     'search' => '',
     'breadcrumbs' => [],
-    'buttons' => [],
 ])
-<div class="min-h-screen flex flex-col">
+<div class="h-[calc(100vh-7rem)] lg:h-[calc(100vh-4rem)] flex flex-col">
     <div class="relative mb-4 w-full">
         <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <flux:breadcrumbs>
@@ -22,23 +21,25 @@
                     @endif
                 @endforeach
             </flux:breadcrumbs>
-
-            <flux:button.group class="md:shrink-0">
-                @foreach ($buttons as $button)
-                    <flux:button href="{{ $button['url'] }}" variant="primary" color="{{ $button['color'] ?? 'blue' }}" icon="{{ $button['icon'] }}" size="{{ $button['size'] ?? 'sm' }}">
-                        {{ $button['label'] }}
-                    </flux:button>
-                @endforeach
-            </flux:button.group>
+            @if ($buttons->isEmpty())
+            @else
+                <div class="flex items-center justify-end gap-3">
+                    {{ $buttons }}
+                </div>
+            @endif
         </div>
         <flux:separator variant="subtle" class="my-2"/>
     </div>
     <!-- Main content area fills remaining viewport height on desktop -->
-    <div class="flex-1 flex items-start max-md:flex-col min-h-0">
-        <div class="flex-1 self-stretch max-md:pt-6 overflow-auto">
-            <div class="mt-2 w-full">
-                <div class="my-2 w-full max-w-full space-y-6">
-                    {{ $slot }}
+    <div class="flex-1 flex items-start max-md:flex-col min-h-0 overflow-auto">
+        <!-- Outer wrapper no overflow so focus rings are not clipped -->
+        <div class="flex-1 self-stretch max-md:pt-6">
+            <!-- Scrolling container with padding to avoid cutting focus border -->
+            <div class="h-full overflow-y-auto pb-1">
+                <div class="h-full w-full">
+                    <div class="h-full w-full max-w-full space-y-6">
+                        {{ $slot }}
+                    </div>
                 </div>
             </div>
         </div>

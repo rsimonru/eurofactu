@@ -9,13 +9,18 @@ return [
     'password' => 'Contraseña',
     'two_factor_auth' => 'Autenticación de dos factores',
     'profile_and_account_settings' => 'Gestiona tu perfil y la configuración de la cuenta',
+    'more_info' => 'Más información',
 
     // Campos/acciones comunes
     'name' => 'Nombre',
     'email' => 'e-mail',
     'you' => 'Tú',
     'created_at' => 'Creado el',
+    'active' => 'Activo',
     'actions' => 'Acciones',
+    'new' => 'Nuevo',
+    'search' => 'Buscar',
+    'select' => 'Seleccionar',
     'save' => 'Guardar',
     'saved' => 'Guardado.',
     'cancel' => 'Cancelar',
@@ -24,6 +29,11 @@ return [
     'confirm' => 'Confirmar',
     'continue' => 'Continuar',
     'edit' => 'Editar',
+    'delete' => 'Eliminar',
+    'date' => 'Fecha',
+    'state' => 'Estado',
+    'are_you_sure' => '¿Estás seguro?',
+    'confirm_delete' => '¿Estás seguro de que quieres eliminar este registro? Esta acción no se puede deshacer.',
     'delete' => 'Eliminar',
 
     // Apariencia

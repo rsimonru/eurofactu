@@ -1,0 +1,63 @@
+<?php
+    return [
+        'sales' => 'Venta|Ventas',
+        'budgets' => 'Presupuesto|Presupuestos',
+        'orders' => 'Pedido|Pedidos',
+        'notes' => 'Albarán|Albaranes',
+        'invoices' => 'Factura|Facturas',
+        'lines' => 'Línea|Líneas',
+
+        // Budgets
+        'create_budget' => 'Crear Presupuesto',
+        'edit_budget' => 'Editar Presupuesto',
+        'search_budgets' => 'Buscar presupuestos',
+        'budget_created' => 'Presupuesto creado correctamente',
+        'budget_updated' => 'Presupuesto actualizado correctamente',
+        'budget_lines_placeholder' => 'Las líneas de presupuesto estarán disponibles después de crear el presupuesto',
+
+        // Fields
+        'number' => 'Número',
+        'fiscal_year' => 'Año Fiscal',
+        'customer' => 'Cliente',
+        'company' => 'Empresa',
+        'total' => 'Total',
+        'base' => 'Base',
+        'recipient' => 'Destinatario',
+        'reference' => 'Referencia',
+        'observations' => 'Observaciones',
+        'internal_note' => 'Nota Interna',
+        'valid_until' => 'Válido Hasta',
+        'sent_date' => 'Fecha Envío',
+        'vat' => 'NIF/CIF',
+        'legal_form' => 'Razón Social',
+        'address' => 'Dirección',
+        'zip' => 'Código Postal',
+        'town' => 'Población',
+        'province' => 'Provincia',
+        'phone' => 'Teléfono',
+        'lines' => 'Líneas',
+        'customer_data' => 'Datos del Cliente',
+
+        // Line fields
+        'description' => 'Descripción',
+        'units' => 'Unidades',
+        'price_unit' => 'Precio/Ud',
+        'discount' => 'Dto',
+        'tax' => 'IVA',
+        'subtotal' => 'Subtotal',
+        'taxes' => 'Impuestos',
+        'documents' => 'Documentos',
+        'add_line' => 'Añadir Línea',
+        'line_created' => 'Línea creada correctamente',
+        'line_updated' => 'Línea actualizada correctamente',
+        'line_deleted' => 'Línea eliminada correctamente',
+        'no_lines' => 'No hay líneas añadidas',
+        'save_budget_first' => 'Debe guardar el presupuesto antes de añadir líneas',
+
+        // Placeholders
+        'enter_number' => 'Introducir número',
+        'enter_recipient' => 'Introducir destinatario',
+        'enter_reference' => 'Introducir referencia',
+        'enter_observations' => 'Introducir observaciones',
+        'enter_internal_note' => 'Introducir nota interna',
+    ];

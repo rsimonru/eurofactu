@@ -16,7 +16,7 @@ class SalesInvoicesProduct extends Model
      * Get invoices
      *
      * @param int $iModels_id
-     * @param int $iRecordsInPage
+     * @param int $records_in_page
      * @param array $aSort (attribute => 'asc'/'desc')
      * @param array $aFilters
      * @return mixed Collection
@@ -60,5 +60,20 @@ class SalesInvoicesProduct extends Model
 
     public function sales_invoice() {
         return $this->hasOne(SalesInvoice::class, 'id', 'sinvoice_id');
+    }
+
+    public function product_variant()
+    {
+        return $this->belongsTo(ProductsVariant::class);
+    }
+
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function updatedBy()
+    {
+        return $this->belongsTo(User::class, 'updated_by');
     }
 }

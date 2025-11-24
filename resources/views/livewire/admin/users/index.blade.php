@@ -2,7 +2,6 @@
 
 use App\Models\User;
 use App\Traits\WithSorting;
-use Illuminate\Database\Eloquent\Collection;
 use Livewire\Volt\Component;
 use Livewire\WithPagination;
 
@@ -55,17 +54,18 @@ new class extends Component {
 <section class="w-full">
     <x-documents.layout
         :title="trans_choice('admin.users', 2)"
-        :records="$users"
         :search="'search'"
         :search-placeholder="__('admin.search_users')"
         :breadcrumbs="[
             ['label' => __('admin.admin'), 'url' => null],
             ['label' => trans_choice('admin.users', 2), 'url' => null],
         ]"
-        :buttons="[
-            ['label' => __('admin.new'), 'url' => route('admin.users.create'), 'icon' => 'user-round-plus', 'color' => 'blue', 'size' => 'sm'],
-        ]"
     >
+        <x-slot:buttons>
+            <flux:button type="button" size="sm" variant="primary" color="blue" icon="user-round-plus" href="{{ route('admin.users.create') }}">
+                {{ __('admin.new') }}
+            </flux:button>
+        </x-slot:buttons>
         <!-- Users Table (Flux component) -->
         <flux:table container:class="max-h-80" :paginate="$users">
             <flux:table.columns sticky >

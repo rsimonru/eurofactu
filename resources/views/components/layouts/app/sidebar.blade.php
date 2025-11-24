@@ -15,6 +15,12 @@
                 <flux:navlist.group :heading="__('admin.admin')" class="grid">
                     <flux:navlist.item icon="users" :href="route('admin.users.index')" :current="request()->routeIs('admin.users.index')" wire:navigate>{{ trans_choice('admin.users', 2) }}</flux:navlist.item>
                 </flux:navlist.group>
+                <flux:navlist.group :heading="trans_choice('thirdparties.thirdparties', 2)" class="grid">
+                    <flux:navlist.item icon="building-office-2" :href="route('thirdparties.index')" :current="request()->routeIs('thirdparties.index')" wire:navigate>{{ trans_choice('thirdparties.thirdparties', 2) }}</flux:navlist.item>
+                </flux:navlist.group>
+                <flux:navlist.group :heading="trans_choice('sales.sales', 2)" class="grid">
+                    <flux:navlist.item icon="users" :href="route('sales.budgets.index')" :current="request()->routeIs('sales.budgets.index')" wire:navigate>{{ trans_choice('sales.budgets', 2) }}</flux:navlist.item>
+                </flux:navlist.group>
             </flux:navlist>
 
             <flux:spacer />
@@ -129,5 +135,11 @@
         {{ $slot }}
 
         @fluxScripts
+
+        @persist('toast')
+            <flux:toast.group position="top end" class="pt-24">
+                <flux:toast />
+            </flux:toast.group>
+        @endpersist
     </body>
 </html>

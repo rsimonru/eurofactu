@@ -3,9 +3,11 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "favicons": "node generate-all-favicons.js"
     },
     "dependencies": {
+        "autonumeric": "^4.10.9",
         "autoprefixer": "^10.4.20",
         "axios": "^1.7.4",
         "concurrently": "^9.0.1",
@@ -19,7 +21,8 @@
     },
     "devDependencies": {
         "@tailwindcss/vite": "^4.1.15",
-        "daisyui": "^5.3.7",
-        "tailwindcss": "^4.1.15"
+        "sharp": "^0.34.5",
+        "tailwindcss": "^4.1.15",
+        "to-ico": "^1.0.1"
     }
 }

@@ -13,7 +13,7 @@ class LocalLog extends Model
     protected $table = 'logs';
 
     protected $casts = [
-        'data' => 'array',
+        'data' => 'json',
     ];
 
     protected $fillable = [

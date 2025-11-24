@@ -2,6 +2,7 @@
 
 use App\Models\Permission;
 use App\Models\User;
+use Flux\Flux;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
@@ -13,8 +14,10 @@ new class extends Component {
     public string $email = '';
     public string $password = '';
     public string $password_confirmation = '';
+    public bool $active = true;
     public bool $isEditing = false;
-    public string $activeTab = 'roles';
+    public string $activeTab = 'permissions';
+    public array $user_permissions = [];
 
     /**
      * Mount the component
@@ -26,6 +29,8 @@ new class extends Component {
             $this->isEditing = true;
             $this->name = $this->user->name;
             $this->email = $this->user->email;
+            $this->active = $this->user->active;
+            $this->user_permissions = $this->user->permissions()->pluck('id')->toArray();
         }
     }
 
@@ -48,13 +53,9 @@ new class extends Component {
     }
     public function getPermissions(): array
     {
-        // This method would return a list of permissions.
-        // For demonstration purposes, we'll return a static array.
-        $permissions = Permission::emtGet(
-                records_in_page: -1,
-            )->all();
-
-        return $permissions;
+        return Permission::emtGet(
+            records_in_page: -1,
+        )->all();
     }
 
     /**
@@ -71,6 +72,7 @@ new class extends Component {
                 'max:255',
                 Rule::unique('users')->ignore($this->user?->id),
             ],
+            'active' => ['boolean'],
         ];
 
         // Password is required for new users, optional for editing
@@ -92,8 +94,10 @@ new class extends Component {
             }
 
             $this->user->save();
+            $permissions = Permission::whereIn('id', $this->user_permissions)->pluck('name')->toArray();
+            $this->user->syncPermissions($permissions);
 
-            session()->flash('status', __('admin.user_updated'));
+            Flux::toast(variant: 'success', text: __('admin.user_updated'));
         } else {
             // Create new user
             $this->user = User::create([
@@ -101,10 +105,12 @@ new class extends Component {
                 'email' => $validated['email'],
                 'password' => Hash::make($validated['password']),
             ]);
-            session()->flash('status', ['id' => $this->user->id], __('admin.user_created'));
-        }
+            $permissions = Permission::whereIn('id', $this->user_permissions)->pluck('name')->toArray();
+            $this->user->syncPermissions($permissions);
 
-        $this->redirect(route('admin.users.index'), navigate: true);
+            Flux::toast(variant: 'success', text: __('admin.user_created'));
+            $this->redirect(route('admin.users.edit', ['user' => $this->user->id]));
+        }
     }
 
     /**
@@ -116,26 +122,25 @@ new class extends Component {
     }
 }; ?>
 
-<section class="w-full">
+<section class="w-full h-full">
     <x-document.layout
         :title="$pageTitle"
         :breadcrumbs="$breadcrumbs"
-        :buttons="[]"
     >
-        @if (session('status'))
-            <flux:callout icon="bell" variant="secondary" inline x-data="{ visible: true }" x-show="visible" class="mb-6">
-                <flux:callout.heading class="flex gap-2 @max-md:flex-col items-start">{{ session('status') }}</flux:callout.heading>
-                <x-slot name="controls">
-                    <flux:button icon="x-mark" variant="ghost" x-on:click="visible = false" />
-                </x-slot>
-            </flux:callout>
-        @endif
+        <x-slot:buttons>
+            <flux:button type="button" size="sm" variant="filled" href="{{ route('admin.users.index') }}">
+                {{ __('general.cancel') }}
+            </flux:button>
 
+            <flux:button type="button" size="sm" variant="primary" wire:click="save">
+                {{ __('general.save') }}
+            </flux:button>
+        </x-slot:buttons>
         <!-- Two-column layout: Form on left, Tabs on right (desktop), stacked on mobile -->
-        <div class="flex flex-col gap-6 lg:flex-row">
+        <div class="flex flex-col gap-6 lg:flex-row h-full">
             <!-- Left Column: Main Form -->
             <div class="w-full lg:w-1/2">
-                <form wire:submit="save" class="space-y-6">
+                <form class="space-y-6 px-2">
                     <!-- Name Field -->
                     <flux:field>
                         <flux:label>{{ __('general.name') }}</flux:label>
@@ -189,36 +194,30 @@ new class extends Component {
                         />
                         <flux:error name="password_confirmation" />
                     </flux:field>
-
-                    <!-- Action Buttons -->
-                    <div class="flex items-center justify-end gap-3">
-                        <flux:button type="button" variant="ghost" wire:click="cancel">
-                            {{ __('general.cancel') }}
-                        </flux:button>
-
-                        <flux:button type="submit" variant="primary">
-                            {{ $isEditing ? __('general.save') : __('admin.create') }}
-                        </flux:button>
-                    </div>
+                    <flux:field>
+                        <flux:label>{{ __('general.active') }}</flux:label>
+                        <flux:switch wire:model="active" />
+                        <flux:error name="active" />
+                    </flux:field>
                 </form>
             </div>
 
             <!-- Right Column: Tabs (desktop), Below on mobile -->
-            <div class="w-full lg:w-1/2">
-                <flux:tab.group wire:model="activeTab" class="space-y-6">
+            <div class="w-full lg:w-1/2 h-full">
+                <flux:tab.group class="space-y-6">
                     <flux:tabs>
-                        <flux:tab name="permissions">{{ trans_choice('admin.permissions', 2) }}</flux:tab>
+                        <flux:tab name="permissions-tab">{{ trans_choice('admin.permissions', 2) }}</flux:tab>
                     </flux:tabs>
 
-                    <flux:tab.panel name="permissions" class="!pt-1">
+                    <flux:tab.panel name="permissions-tab" class="!pt-1">
                         <!-- Permissions list with vertical scroll -->
-                        <flux:checkbox.group wire:model="permissions" class="max-h-64 overflow-y-auto">
+                        <flux:checkbox.group wire:model="user_permissions" class="max-h-96 overflow-y-auto">
                             @foreach ($permissions as $permission)
                                 <flux:checkbox value="{{ $permission['id'] }}" label="{{ $permission->description }}" />
                             @endforeach
                         </flux:checkbox.group>
                     </flux:tab.panel>
-                </flux:tabs>
+                </flux:tab.group>
             </div>
         </div>
     </x-document.layout>

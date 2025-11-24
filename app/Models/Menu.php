@@ -23,7 +23,7 @@ class Menu extends Model
      * Get menus
      *
      * @param int $iUsers_id
-     * @param int $iRecordsInPage
+     * @param int $records_in_page
      * @param array $aSort (attribute => 'asc'/'desc')
      * @param int $bFavorites
      * @param int $iTownHalls_id
@@ -33,7 +33,7 @@ class Menu extends Model
      */
     public static function emtGet(
         int $iModels_id=0,
-        int $iRecordsInPage = 0,
+        int $records_in_page = 0,
         array $aSort = [],
         array $aFilters = [],
         array $aWith = []
@@ -79,7 +79,7 @@ class Menu extends Model
             }
         }
         //$oQuery->dd();
-        $records = static::getModelData($oQuery, $iModels_id, $iRecordsInPage, $aWith);
+        $records = static::getModelData($oQuery, $iModels_id, $records_in_page, $aWith);
         if (isset($aFilters['iUsers_id']) && $aFilters['iUsers_id']>0) {
             $records->sortBy($aSort);
         }

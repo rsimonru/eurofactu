@@ -18,7 +18,7 @@ class State extends Model
      * Get state
      *
      * @param int $iModels_id
-     * @param int $iRecordsInPage
+     * @param int $records_in_page
      * @param array $aSort (attribute => 'asc'/'desc')
      * @param array $aFilters
      * @return mixed Collection
@@ -26,7 +26,7 @@ class State extends Model
      */
     public static function emtGet(
         int $iModels_id=0,
-        int $iRecordsInPage = 0,
+        int $records_in_page = 0,
         array $aSort = [],
         array $aFilters = []
     ) {
@@ -44,7 +44,7 @@ class State extends Model
             $oQuery->orderBy($key, $value);
         }
         //$oQuery->dd();
-        return static::getModelData($oQuery, $iModels_id, $iRecordsInPage);
+        return static::getModelData($oQuery, $iModels_id, $records_in_page);
     }
 
 }

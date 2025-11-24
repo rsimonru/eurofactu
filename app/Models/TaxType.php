@@ -40,6 +40,9 @@ class TaxType extends Model
         ->when(isset($filters['tax_type_ids']) && $filters['tax_type_ids']>0, function($query) use ($filters) {
             return $query->whereIn('tax_types.id', $filters['tax_type_ids']);
         })
+        ->when(isset($filters['value']) && $filters['value'] !== null, function($query) use ($filters) {
+            return $query->where('tax_types.value', $filters['value']);
+        })
         ;
 
         foreach ($sort as $key => $value) {

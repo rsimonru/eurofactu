@@ -25,7 +25,7 @@ class SalesInvoice extends Model
      * Get invoices
      *
      * @param int $iModels_id
-     * @param int $iRecordsInPage
+     * @param int $records_in_page
      * @param array $aSort (attribute => 'asc'/'desc')
      * @param array $aFilters
      * @return mixed Collection

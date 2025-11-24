@@ -12,11 +12,36 @@ class Thirdparty extends Model
     use WithExtensions;
     use SoftDeletes;
 
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+        'is_customer' => 'boolean',
+        'is_supplier' => 'boolean',
+    ];
+
+    protected $fillable = [
+        'legal_form',
+        'contact',
+        'vat',
+        'is_customer',
+        'is_supplier',
+        'address',
+        'town',
+        'province',
+        'zip',
+        'country_id',
+        'phone',
+        'mobile',
+        'email',
+        'invoice_email',
+        'observations',
+    ];
+
     /**
      * Get permissions
      *
      * @param int $iModels_id
-     * @param int $iRecordsInPage
+     * @param int $records_in_page
      * @param array $aSort (attribute => 'asc'/'desc')
      * @param array $aFilters
      * @return mixed Collection
@@ -78,5 +103,10 @@ class Thirdparty extends Model
     public function save(array $options = array(), $do_log = true)
     {
         parent::save($options, $do_log);
+    }
+
+    public function country()
+    {
+        return $this->belongsTo(Country::class);
     }
 }

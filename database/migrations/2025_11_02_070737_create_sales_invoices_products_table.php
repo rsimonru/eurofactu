@@ -18,15 +18,15 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->integer('units');
             $table->string('discount_type', 5)->nullable()->default('P');
-            $table->decimal('discountp', 12, 3)->nullable()->default(0);
+            $table->decimal('discountp', 12, 4)->nullable()->default(0);
             $table->decimal('discounti', 12, 3)->nullable()->default(0);
             $table->decimal('base_unit', 12, 3);
             $table->decimal('base_result', 12, 3);
             $table->decimal('base_line', 12, 3);
-            $table->decimal('tax_type', 12, 3);
+            $table->decimal('tax_type', 12, 4);
             $table->decimal('tax_unit', 12, 3);
             $table->decimal('tax_line', 12, 3);
-            $table->decimal('es_type', 12, 3);
+            $table->decimal('es_type', 12, 4);
             $table->decimal('es_unit', 12, 3);
             $table->decimal('es_line', 12, 3);
             $table->decimal('total_line', 12, 3);
