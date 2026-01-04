@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Spatie\Permission\PermissionRegistrar;
@@ -57,7 +58,10 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'last_login' => 'datetime',
             'password' => 'hashed',
+            'active' => 'boolean',
+            'filters' => 'array',
         ];
     }
 
@@ -164,7 +168,7 @@ class User extends Authenticatable
      */
     public static function getFilters($key = '')
     {
-        $oUser = User::find(auth()->user()->id);
+        $oUser = User::find(Auth::user()->id);
         $aUFilters = $oUser->filters;
         $templates = config('filters');
         $flist = [
@@ -182,7 +186,7 @@ class User extends Authenticatable
                     $oUser->filters = $aUFilters;
                     $oUser->save();
                 } else {
-                    return array(); // No hay plantilla para esa clave
+                    return []; // No hay plantilla para esa clave
                 }
             }
 
@@ -194,6 +198,10 @@ class User extends Authenticatable
                     switch ($value[0]) {
                         case 'text':
                             $aValues = [$aUFilters[$key][$key1]];
+                            $label = $value[2];
+                            break;
+                        case 'boolean':
+                            $aValues = [$aUFilters[$key][$key1] == 1 ? true : false];
                             $label = $value[2];
                             break;
                         case 'array':
@@ -224,19 +232,21 @@ class User extends Authenticatable
                             $label = $value[2];
                             break;
                         case 'date':
-                            $date_from = new Carbon($aUFilters[$key][$key1][1]);
-                            $date_to = new Carbon($aUFilters[$key][$key1][2]);
-                            $label = config('constants.date_type.' . $aUFilters[$key][$key1][0]);
-                            $aValues = [$label . ' de ' . $date_from->format('d-m-Y') . ' a ' . $date_to->format('d-m-Y')];
+                            if (!empty($aUFilters[$key][$key1][0])) {
+                                $date_from = new Carbon($aUFilters[$key][$key1][1]);
+                                $date_to = new Carbon($aUFilters[$key][$key1][2]);
+                                $label = config('constants.date_type.' . $aUFilters[$key][$key1][0]);
+                                $aValues = [$date_from->format('d-m-Y') . ' a ' . $date_to->format('d-m-Y')];
+                            }
                             break;
                     }
                     if (!empty($aValues)) {
                         $flist['FilterOn'] = 1;
+                        $flist['aValues'][$key1] = array(
+                            'aValues' => $aValues,
+                            'label' => $label
+                        );
                     }
-                    $flist['aValues'][$key1] = array(
-                        'aValues' => $aValues,
-                        'label' => $label
-                    );
                 }
             }
             // Valor por defecto para los filtros
@@ -274,7 +284,7 @@ class User extends Authenticatable
      */
     public static function saveFilters($key, $filters)
     {
-        $oUser = User::find(auth()->user()->id);
+        $oUser = User::find(Auth::user()->id);
         $aUFilters = $oUser->filters;
         $templates = config('filters');
         $aClean = array();
@@ -400,5 +410,14 @@ class User extends Authenticatable
         }
 
         return $relation->wherePivot(app(PermissionRegistrar::class)->teamsKey, getPermissionsTeamId());
+    }
+
+    public function companies()
+    {
+        return $this->belongsToMany(Company::class);
+    }
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
     }
 }

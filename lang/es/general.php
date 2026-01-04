@@ -10,6 +10,8 @@ return [
     'two_factor_auth' => 'Autenticación de dos factores',
     'profile_and_account_settings' => 'Gestiona tu perfil y la configuración de la cuenta',
     'more_info' => 'Más información',
+    'companies' => 'Empresa|Empresas',
+    'saved_successfully' => 'Guardado correctamente.',
 
     // Campos/acciones comunes
     'name' => 'Nombre',
@@ -17,8 +19,11 @@ return [
     'you' => 'Tú',
     'created_at' => 'Creado el',
     'active' => 'Activo',
+    'inactive' => 'Inactivo',
+    'last_login' => 'Último acceso',
     'actions' => 'Acciones',
     'new' => 'Nuevo',
+    'add' => 'Añadir',
     'search' => 'Buscar',
     'select' => 'Seleccionar',
     'save' => 'Guardar',
@@ -30,11 +35,16 @@ return [
     'continue' => 'Continuar',
     'edit' => 'Editar',
     'delete' => 'Eliminar',
+    'filter' => 'Filtar',
+    'delete_filter' => 'Eliminar filtros',
+    'filters' => 'Filtro|Filtros',
+    'send' => 'Enviar',
     'date' => 'Fecha',
     'state' => 'Estado',
     'are_you_sure' => '¿Estás seguro?',
-    'confirm_delete' => '¿Estás seguro de que quieres eliminar este registro? Esta acción no se puede deshacer.',
-    'delete' => 'Eliminar',
+    'confirm_delete' => '¿Estás seguro de que quieres eliminar el registro elegido? Esta acción no se puede deshacer.',
+    'selected' => 'seleccionados',
+    'thirdparties' => 'Tercero|Terceros',  
 
     // Apariencia
     'appearance' => 'Apariencia',
@@ -79,4 +89,11 @@ return [
     'enter_code_manually' => 'o, introduce el código manualmente',
 
     'no_records_found' => 'No se han encontrado registros.',
+    'add_email' => 'Añade al menos un correo electrónico',
+    'no_products_found' => 'No hay productos.',
+    'no_variants_found' => 'No hay variantes.',
+    'products' => 'Producto|Productos',
+    'variants' => 'Variante|Variantes',
+    'no_product_selected' => 'Sin producto',
+    'no_variant_selected' => 'Sin variante',
 ];

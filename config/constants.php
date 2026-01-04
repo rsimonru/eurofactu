@@ -2,7 +2,7 @@
 
 return [
 	'pagination' => [
-		'DEFAULT_PAGE_RECORDS' => 150,
+		'DEFAULT_PAGE_RECORDS' => 25,
 		'LIMIT_PAGE_RECORDS' => 1000
 	],
 	'levels' => [
@@ -25,10 +25,11 @@ return [
         'sent' => 9,
     ],
     'date_type' => [
-		'created_at' => 'Fecha alta',
-		'customer_date' => 'Fecha cliente',
-		'expiration_date' => 'Fecha vencimiento',
-		'delivery_date' => 'Fecha entrega',
-		'last_login' => 'Última conexión',
+		'created_at' => 'F. alta',
+		'customer_date' => 'F. cliente',
+		'expiration_date' => 'F. vencimiento',
+		'delivery_date' => 'F. entrega',
+		'last_login' => 'Últ. conexión',
+		'date' => 'F. documento',
 	],
 ];

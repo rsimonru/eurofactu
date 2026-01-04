@@ -82,4 +82,8 @@ class Company extends Model
     public function banks_account() {
         return $this->hasOne(BanksAccount::class, 'company_id', 'id')->where('default', 1);
     }
+    public function users()
+    {
+        return $this->belongsToMany(User::class);
+    }
 }

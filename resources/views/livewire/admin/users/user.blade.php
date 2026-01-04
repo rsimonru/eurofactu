@@ -2,6 +2,7 @@
 
 use App\Models\Permission;
 use App\Models\User;
+use App\Models\Company;
 use Flux\Flux;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
@@ -18,6 +19,7 @@ new class extends Component {
     public bool $isEditing = false;
     public string $activeTab = 'permissions';
     public array $user_permissions = [];
+    public array $user_companies = [];
 
     /**
      * Mount the component
@@ -31,6 +33,7 @@ new class extends Component {
             $this->email = $this->user->email;
             $this->active = $this->user->active;
             $this->user_permissions = $this->user->permissions()->pluck('id')->toArray();
+            $this->user_companies = $this->user->companies->pluck('id')->toArray();
         }
     }
 
@@ -49,11 +52,18 @@ new class extends Component {
                 ['label' => $this->isEditing ? __('admin.edit') : __('admin.new'), 'url' => null],
             ],
             'permissions' => $this->getPermissions(),
+            'companies' => $this->getCompanies(),
         ];
     }
     public function getPermissions(): array
     {
         return Permission::emtGet(
+            records_in_page: -1,
+        )->all();
+    }
+    public function getCompanies(): array
+    {
+        return Company::emtGet(
             records_in_page: -1,
         )->all();
     }
@@ -88,6 +98,7 @@ new class extends Component {
             // Update existing user
             $this->user->name = $validated['name'];
             $this->user->email = $validated['email'];
+            $this->user->active = $validated['active'];
 
             if (!empty($validated['password'])) {
                 $this->user->password = Hash::make($validated['password']);
@@ -96,6 +107,7 @@ new class extends Component {
             $this->user->save();
             $permissions = Permission::whereIn('id', $this->user_permissions)->pluck('name')->toArray();
             $this->user->syncPermissions($permissions);
+            $this->user->companies()->sync($this->user_companies);
 
             Flux::toast(variant: 'success', text: __('admin.user_updated'));
         } else {
@@ -207,6 +219,7 @@ new class extends Component {
                 <flux:tab.group class="space-y-6">
                     <flux:tabs>
                         <flux:tab name="permissions-tab">{{ trans_choice('admin.permissions', 2) }}</flux:tab>
+                        <flux:tab name="companies-tab">{{ trans_choice('general.companies', 2) }}</flux:tab>
                     </flux:tabs>
 
                     <flux:tab.panel name="permissions-tab" class="!pt-1">
@@ -217,6 +230,14 @@ new class extends Component {
                             @endforeach
                         </flux:checkbox.group>
                     </flux:tab.panel>
+                    <flux:tab.panel name="companies-tab" class="!pt-1">
+                        <!-- Companies list with vertical scroll -->
+                        <flux:checkbox.group wire:model="user_companies" class="max-h-96 overflow-y-auto">
+                            @foreach ($companies as $company)
+                                <flux:checkbox value="{{ $company['id'] }}" label="{{ $company->name }}" />
+                            @endforeach
+                        </flux:checkbox.group>
+                    </flux:tab.panel>   
                 </flux:tab.group>
             </div>
         </div>

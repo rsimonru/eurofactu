@@ -44,4 +44,7 @@
             </div>
         </div>
     </div>
+    @if (isset($modals) && !$modals->isEmpty())
+        {{ $modals }}
+    @endif
 </div>

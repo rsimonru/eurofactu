@@ -15,6 +15,17 @@ class SalesBudgetsProduct extends Model
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'units' => 'float',
+        'base_unit' => 'float',
+        'discountp' => 'float',
+        'discounti' => 'float',
+        'base_result' => 'float',
+        'base_line' => 'float',
+        'tax_unit' => 'float',
+        'tax_line' => 'float',
+        'es_unit' => 'float',
+        'es_line' => 'float',
+        'total_line' => 'float',
     ];
 
     protected $fillable = [

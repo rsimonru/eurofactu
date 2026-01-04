@@ -22,6 +22,9 @@
     'icon' => null,
     'kbd' => null,
     'as' => null,
+    'maxValue' => null,
+    'minValue' => null,
+    'decimals' => 2,
 ])
 
 @php
@@ -148,37 +151,43 @@ $classes = Flux::classes()
                 wireModelName: @js($wireModelName),
                 init() {
                     const input = this.$refs.autonumericInput;
+                    const inputHidden = this.$refs.autonumericInputHidden;
 
                     if (input && window.AutoNumeric) {
                         // Get initial value from Livewire
                         const initialValue = $wire.get(this.wireModelName);
 
                         // Configure Autonumeric for Spanish format (comma as decimal, dot as thousands separator)
-                        this.autonumericInstance = new window.AutoNumeric(input, {
+                        options = {
                             digitGroupSeparator: '.',
                             decimalCharacter: ',',
-                            decimalPlaces: 2,
+                            decimalPlaces: @js($decimals),
                             allowDecimalPadding: true,
-                            decimalPlacesRawValue: 2,
+                            decimalPlacesRawValue: @js($decimals),
                             unformatOnSubmit: false,
                             modifyValueOnWheel: false,
-                            selectOnFocus: true,
-                            minimumValue: '0',
-                        }, initialValue || null);
+                            emptyInputBehavior: 'zero'
+                        };
+                        if (@js($maxValue)) {
+                            options.maximumValue = @js($maxValue);
+                        }
+                        if (@js($minValue)) {
+                            options.minimumValue = @js($minValue);
+                        }
+                        this.autonumericInstance = new window.AutoNumeric(input, initialValue || null, options);
 
                         // Sync with Livewire on change
                         const syncToLivewire = () => {
                             const rawValue = this.autonumericInstance.getNumber();
                             if (rawValue !== null && !isNaN(rawValue)) {
-                                $wire.set(this.wireModelName, rawValue);
+                                inputHidden.value = rawValue;
                             } else {
-                                $wire.set(this.wireModelName, null);
+                                inputHidden.value = null;
                             }
+                            inputHidden.dispatchEvent(new Event('input'));
                         };
 
                         // Listen to Autonumeric events
-                        input.addEventListener('autoNumeric:rawValueModified', syncToLivewire);
-                        input.addEventListener('input', syncToLivewire);
                         input.addEventListener('blur', syncToLivewire);
 
                         // Listen for Livewire updates
@@ -213,12 +222,17 @@ $classes = Flux::classes()
                 </div>
             <?php endif; ?>
 
+            @if ($useAutonumeric)
+                <input x-ref="autonumericInputHidden" type="hidden" {{ $attributes->wire('model') }}>
+            @endif
             <input
                 x-ref="autonumericInput"
                 type="{{ $useAutonumeric ? 'text' : $type }}"
                 inputmode="{{ $useAutonumeric ? 'decimal' : ($type === 'number' ? 'numeric' : 'text') }}"
                 {{-- Leave file inputs unstyled... --}}
-                {{ $useAutonumeric ? $attributes->except(['class', 'wire:model', 'wire:model.live', 'wire:model.defer', 'type'])->class($type === 'file' ? '' : $classes) : $attributes->except('class')->class($type === 'file' ? '' : $classes) }}
+                {{ $useAutonumeric 
+                    ? $attributes->except(['class', 'wire:model', 'wire:model.live', 'wire:model.defer', 'type'])->class($type === 'file' ? '' : $classes) 
+                    : $attributes->except('class')->class($type === 'file' ? '' : $classes) }}
                 @isset ($name) name="{{ $name }}" @endisset
                 @if (!$useAutonumeric && $maskDynamic) x-mask:dynamic="{{ $maskDynamic }}" @elseif (!$useAutonumeric && $mask) x-mask="{{ $mask }}" @endif
                 @if ($invalid) aria-invalid="true" data-invalid @endif

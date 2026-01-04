@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Traits\WithExtensions;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class SalesBudget extends Model
@@ -119,8 +120,13 @@ class SalesBudget extends Model
         ->when(isset($filters['fiscal_year']) && !empty($filters['fiscal_year']), function($query) use ($filters) {
             return $query->where('sales_budgets.fiscal_year', $filters['fiscal_year']);
         })
-        ->when(isset($filters['date']) && !empty($filters['date']), function ($query) use ($filters) {
-            return $query->whereBetween('sales_budgets.' . $filters['date'][0], [$filters['date'][1], $filters['date'][2]]);
+        ->when(isset($filters['date']) && isset($filters['date'][0]) && !empty($filters['date'][0]), function ($query) use ($filters) {
+            if (empty($filters['date'][1]) || empty($filters['date'][2])) {
+                return $query;
+            }
+            $from = (new Carbon($filters['date'][1]))->startOfDay();
+            $to = (new Carbon($filters['date'][2]))->endOfDay();
+            return $query->whereBetween('sales_budgets.' . $filters['date'][0], [$from, $to]);
         })
         ->when(isset($filters['search']) && !empty($filters['search']), function($query) use ($filters) {
             return $query->where(function ($query) use ($filters){
@@ -209,6 +215,7 @@ class SalesBudget extends Model
     public function save(array $options = array(), $do_log = true)
     {
         $is_new = empty($this->id) ? true : false;
+        $is_dirty_state = $this->isDirty('state_id');
         if ($is_new) {
             $this->company_id = empty($this->company_id) ? session('company')->id ?? 1 : $this->company_id;
             $this->fiscal_year = empty($this->fiscal_year) ? session('working_year', today()->format('Y')) : $this->fiscal_year;
@@ -221,6 +228,9 @@ class SalesBudget extends Model
             $this->sequential = $sequential;
             $this->number = 'PR' . $this->fiscal_year.'-'.sprintf('%04d', $sequential);
 
+        }
+        if ($is_dirty_state && $this->state_id === config('constants.states.sent') && $this->sent_date === null) {
+            $this->sent_date = now();
         }
         parent::save($options, $do_log);
     }

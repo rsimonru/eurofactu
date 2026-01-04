@@ -13,14 +13,7 @@ class LocalLog extends Model
     protected $table = 'logs';
 
     protected $casts = [
-        'data' => 'json',
-    ];
-
-    protected $fillable = [
-        'procedure',
-        'data',
-        'observations',
-        'created_user',
+        'data' => 'array',
     ];
 
     /**
@@ -61,11 +54,11 @@ class LocalLog extends Model
         ?array $filters = []
     ) {
 
-        $query->when(isset($filters['verifactu_log_ids']) && !empty($filters['verifactu_log_ids']), function($query) use ($filters) {
-            $query->whereIn('verifactu_logs.id', $filters['verifactu_log_ids']);
+        $query->when(isset($filters['log_ids']) && !empty($filters['log_ids']), function($query) use ($filters) {
+            $query->whereIn('logs.id', $filters['log_ids']);
         })
         ->when(isset($filters['company_id']) && !empty($filters['company_id']), function($query) use ($filters) {
-            return $query->where('verifactu_logs.company_id', $filters['company_id']);
+            return $query->where('logs.company_id', $filters['company_id']);
         })
         ;
 

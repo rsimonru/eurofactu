@@ -30,4 +30,16 @@ return [
     'assign_roles_description' => 'Asigna roles a este usuario para otorgarle permisos específicos.',
     'assign_permissions_description' => 'Concede permisos individuales a este usuario.',
     'activity_log_description' => 'Ver el registro de actividad de este usuario.',
+
+    'edit_company' => 'Editar Empresa',
+    'company_updated' => 'Empresa actualizada correctamente.',   
+    'vat' => 'CIF/NIF/NIE',
+    'legal_form' => 'Razón social',
+    'address' => 'Dirección',
+    'zip' => 'Código Postal',
+    'town' => 'Ciudad',
+    'province' => 'Provincia',
+    'phone' => 'Teléfono',
+    'email' => 'Email',
+    'web' => 'Web',
 ];

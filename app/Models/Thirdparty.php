@@ -82,11 +82,15 @@ class Thirdparty extends Model
         ->when(isset($filters['email']) && !empty($filters['email']), function($query) use ($filters) {
             return $query->where('thirdparties.legal_form', 'email', '%'.$filters['email'].'%');
         })
-        ->when(isset($filters['is_customer']) && $filters['is_customer'] !== null, function($query) use ($filters) {
-            return $query->where('thirdparties.is_customer', $filters['is_customer']);
-        })
-        ->when(isset($filters['is_supplier']) && $filters['is_supplier'] !== null, function($query) use ($filters) {
-            return $query->where('thirdparties.is_supplier', $filters['is_supplier']);
+        ->when((isset($filters['is_customer']) && !empty($filters['is_customer'])) || (isset($filters['is_supplier']) && !empty($filters['is_supplier'])), function($query) use ($filters) {
+            return $query->where(function($query) use ($filters) {
+                $query->when(isset($filters['is_customer']), function($query) use ($filters) {
+                    $query->orWhere('thirdparties.is_customer', $filters['is_customer']);
+                })
+                ->when(isset($filters['is_supplier']), function($query) use ($filters) {
+                    $query->orWhere('thirdparties.is_supplier', $filters['is_supplier']);
+                });
+            });
         })
         ->when(isset($filters['search']) && !empty($filters['search']), function($query) use ($filters) {
             return $query->where(function ($query) use ($filters){

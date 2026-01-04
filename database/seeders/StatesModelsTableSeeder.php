@@ -21,8 +21,9 @@ class StatesModelsTableSeeder extends Seeder
             ["id" => 3, "created_at" => now(), "updated_at" => now(), 'states_id' => 3, 'model' => 'App\Models\SalesInvoice', 'order' => 1, ],
             ["id" => 4, "created_at" => now(), "updated_at" => now(), 'states_id' => 9, 'model' => 'App\Models\SalesInvoice', 'order' => 3, ],
 
-            ["id" => 6, "created_at" => now(), "updated_at" => now(), 'states_id' => 2, 'model' => 'App\Models\Budget', 'order' => 1, ],
-            ["id" => 8, "created_at" => now(), "updated_at" => now(), 'states_id' => 8, 'model' => 'App\Models\Budget', 'order' => 2, ],
+            ["id" => 6, "created_at" => now(), "updated_at" => now(), 'states_id' => 2, 'model' => 'App\Models\SalesBudget', 'order' => 1, ],
+            ["id" => 8, "created_at" => now(), "updated_at" => now(), 'states_id' => 8, 'model' => 'App\Models\SalesBudget', 'order' => 2, ],
+            ["id" => 9, "created_at" => now(), "updated_at" => now(), 'states_id' => 9, 'model' => 'App\Models\SalesBudget', 'order' => 3, ],
 
         ];
 

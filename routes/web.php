@@ -20,6 +20,9 @@ Route::middleware(['auth'])->group(function () {
     Volt::route('admin/users/create', 'admin.users.user')->name('admin.users.create');
     Volt::route('admin/users/{id}/edit', 'admin.users.user')->name('admin.users.edit');
 
+    // Admin Company
+    Volt::route('admin/company-edit', 'admin.companies.company')->name('admin.company.edit');
+
     // Sales Budgets
     Volt::route('sales/budgets', 'sales.budgets.index')->name('sales.budgets.index');
     Volt::route('sales/budgets/create', 'sales.budgets.budget')->name('sales.budgets.create');
@@ -29,6 +32,11 @@ Route::middleware(['auth'])->group(function () {
     Volt::route('thirdparties', 'thirdparties.index')->name('thirdparties.index');
     Volt::route('thirdparties/create', 'thirdparties.thirdparty')->name('thirdparties.create');
     Volt::route('thirdparties/{id}/edit', 'thirdparties.thirdparty')->name('thirdparties.edit');
+
+    // Products
+    Volt::route('products', 'products.index')->name('products.index');
+    Volt::route('products/create', 'products.product')->name('products.create');
+    Volt::route('products/{id}/edit', 'products.product')->name('products.edit');
 
     Volt::route('settings/profile', 'settings.profile')->name('profile.edit');
     Volt::route('settings/password', 'settings.password')->name('user-password.edit');

@@ -1,0 +1,22 @@
+<?php
+return [
+    'products' => 'Product|Products',
+    'variants' => 'Variant|Variants',
+    'create_product' => 'Create Product',
+    'edit_product' => 'Edit Product',
+    'product_created' => 'Product created successfully',
+    'product_updated' => 'Product updated successfully',
+    'product_deleted' => 'Product deleted successfully',
+    'search_products' => 'Search products',
+    'filter_products' => 'Filter products',
+    'reference' => 'Reference',
+    'description' => 'Description',
+    'price' => 'Price',
+    'stock' => 'Stock',
+    'tax_type' => 'Tax Type',
+    'company' => 'Company',
+    'enter_reference' => 'Enter reference',
+    'enter_description' => 'Enter description',
+    'enter_price' => 'Enter price',
+    'select_tax_type' => 'Select tax type',
+];

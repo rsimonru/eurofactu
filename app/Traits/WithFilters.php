@@ -13,26 +13,33 @@ trait WithFilters
 	public $filter_defaults;
 	public $filter_name = '';
 
+	/**
+     * Reset search
+     */
+    public function updatedFilter($value, $key): void
+    {
+        if ($key === 'search') {
+            $this->searchRecords(true);
+        }
+    }
+
 	public function searchRecords($modal = true)
 	{
 		if ($modal) {
 			// $this->validate();
 		}
 		if (isset($this->filter['date']) && length($this->filter['date']) == 3) {
-			$this->filter['date'][1] = Carbon::createFromFormat(config('locale.languages.'.app()->getLocale().'.5'), $this->filter['date'][1])->format('Y-m-d');
-			$this->filter['date'][2] = Carbon::createFromFormat(config('locale.languages.'.app()->getLocale().'.5'), $this->filter['date'][2])->format('Y-m-d');
+			$this->filter['date'][1] = $this->filter['date'][1] ? Carbon::createFromFormat('Y-m-d', $this->filter['date'][1])->format('Y-m-d') : null;
+			$this->filter['date'][2] = $this->filter['date'][1] ? Carbon::createFromFormat('Y-m-d', $this->filter['date'][2])->format('Y-m-d') : null;
 		}
         if (isset($this->filter_component['date']) && length($this->filter_component['date']) == 3) {
-			$this->filter_component['date'][1] = Carbon::createFromFormat(config('locale.languages.'.app()->getLocale().'.5'), $this->filter_component['date'][1])->format('Y-m-d');
-			$this->filter_component['date'][2] = Carbon::createFromFormat(config('locale.languages.'.app()->getLocale().'.5'), $this->filter_component['date'][2])->format('Y-m-d');
+			$this->filter_component['date'][1] = $this->filter_component['date'][1] ? Carbon::createFromFormat('Y-m-d', $this->filter_component['date'][1])->format('Y-m-d') : null;
+			$this->filter_component['date'][2] = $this->filter_component['date'][2] ? Carbon::createFromFormat('Y-m-d', $this->filter_component['date'][2])->format('Y-m-d') : null;
 		}
 		User::saveFilters($this->filter_name, $this->filter);
-		// $this->emit('searchRecords');
         $this->resetPage();
 		if ($modal) {
-			// $this->closeModal();
-			//$this->dispatchBrowserEvent('filterModal', [false]);
-            $this->dispatchBrowserEvent('closeModal', ['modalID' => 'filterModal']);
+			$this->modal('filter-records')->close();
 		}
 	}
 
@@ -40,32 +47,29 @@ trait WithFilters
 	{
 		$this->filter[$field] = config('filters.' . $this->filter_name . '.0.' . $field);
 		User::saveFilters($this->filter_name, $this->filter);
-		$this->emit('searchRecords');
+		$this->dispatch('searchRecords');
 	}
 
 	public function deleteFilter()
 	{
 		$this->filter = config('filters.' . $this->filter_name . '.0');
-        $methodVar = [get_class($this),'initValues'];
+        $methodVar = [get_class($this), 'initValues'];
         // dd(get_class($this));
         if (is_callable('initValues', false)) {
             $this->initValues();
         }
 		User::saveFilters($this->filter_name, $this->filter);
         $this->resetPage();
-		// $this->emit('searchRecords');
-		//$this->dispatchBrowserEvent('filterModal', ['open' => false]);
-        $this->dispatchBrowserEvent('closeModal', ['modalID' => 'filterModal']);
-		// $this->closeModal();
-		// $this->dispatchBrowserEvent('closeModal', ['modalID' => 'searchRecords']);
+
+		$this->modal('filter-records')->close();
 	}
 
 	public function getMergeFilters()
 	{
         $filters = array_merge($this->filter, $this->filter_component ?? []);
         if (isset($filters['date']) && length($filters['date']) == 3) {
-			$filters['date'][1] = Carbon::createFromFormat(config('locale.languages.'.app()->getLocale().'.5'), $filters['date'][1])->format('Y-m-d');
-			$filters['date'][2] = Carbon::createFromFormat(config('locale.languages.'.app()->getLocale().'.5'), $filters['date'][2])->format('Y-m-d');
+			$filters['date'][1] = $filters['date'][1] ? Carbon::createFromFormat('Y-m-d', $filters['date'][1])->format('Y-m-d') : null;
+			$filters['date'][2] = $filters['date'][2] ? Carbon::createFromFormat('Y-m-d', $filters['date'][2])->format('Y-m-d') : null;
 		}
 		return $filters;
 	}
@@ -81,12 +85,12 @@ trait WithFilters
 			$this->sortDirection = $this->filter['order'];
 
 			if (!empty($this->filter['date'])) {
-				$this->filter['date'][1] = (new Carbon($this->filter['date'][1]))->format(config('locale.languages.'.app()->getLocale().'.5'));
-				$this->filter['date'][2] = (new Carbon($this->filter['date'][2]))->format(config('locale.languages.'.app()->getLocale().'.5'));
+				$this->filter['date'][1] = $this->filter['date'][1] ? (new Carbon($this->filter['date'][1]))->format('Y-m-d') : null;
+				$this->filter['date'][2] = $this->filter['date'][2] ? (new Carbon($this->filter['date'][2]))->format('Y-m-d') : null;
 			}
             if (!empty($this->filter_component['date'])) {
-				$this->filter_component['date'][1] = (new Carbon($this->filter_component['date'][1]))->format(config('locale.languages.'.app()->getLocale().'.5'));
-				$this->filter_component['date'][2] = (new Carbon($this->filter_component['date'][2]))->format(config('locale.languages.'.app()->getLocale().'.5'));
+				$this->filter_component['date'][1] = $this->filter_component['date'][1] ? (new Carbon($this->filter_component['date'][1]))->format('Y-m-d') : null;
+				$this->filter_component['date'][2] = $this->filter_component['date'][2] ? (new Carbon($this->filter_component['date'][2]))->format('Y-m-d') : null;
 			}
 
 			if (!empty($filter['filters_defaults'][$this->filter_name])) {

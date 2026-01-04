@@ -14,8 +14,12 @@ return new class extends Migration
         Schema::create('products', function (Blueprint $table) {
             $table->id();
             $table->foreignId('company_id')->constrained('companies');
+            $table->foreignId('tax_type_id')->constrained('tax_types');
             $table->string('description', 200);
+            $table->string('reference', 75)->nullable();
+            $table->decimal('price', 12, 3);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

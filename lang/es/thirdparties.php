@@ -6,6 +6,7 @@ return [
     'create_thirdparty' => 'Ctear Tercero',
     'edit_thirdparty' => 'Etitar Tercero',
     'search_thirdparties' => 'Buscar terceros',
+    'filter_thirdparties' => 'Filtrar terceros',
 
     // Messages
     'thirdparty_created' => 'Tercero creado correctamente',
@@ -27,8 +28,8 @@ return [
     'email' => 'Email',
     'invoice_email' => 'Email Facturación',
     'observations' => 'Observaciones',
-    'is_customer' => 'Es Cliente',
-    'is_supplier' => 'Es Proveedor',
+    'is_customer' => 'Es cliente',
+    'is_supplier' => 'Es proveedor',
     'customer' => 'Cliente',
     'supplier' => 'Proveedor',
     'type' => 'Tipo',

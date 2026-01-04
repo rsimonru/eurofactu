@@ -65,7 +65,6 @@ new class extends Component {
                 ? __('thirdparties.edit_thirdparty')
                 : __('thirdparties.create_thirdparty'),
             'breadcrumbs' => [
-                ['label' => __('thirdparties.thirdparties'), 'url' => null],
                 ['label' => trans_choice('thirdparties.thirdparties', 2), 'url' => route('thirdparties.index')],
                 ['label' => $this->isEditing ? __('general.edit') : __('general.new'), 'url' => null],
             ],
@@ -107,7 +106,7 @@ new class extends Component {
 
             Flux::toast(variant: 'success', text: __('thirdparties.thirdparty_updated'));
         } else {;
-            $this->thirdparty = Thirdparty::create($validated + ['company_id' => 1]);
+            $this->thirdparty = Thirdparty::create($validated + ['company_id' => session('company_id')]);
 
             Flux::toast(variant: 'success', text: __('thirdparties.thirdparty_created'));
             $this->redirect(route('thirdparties.edit', ['id' => $this->thirdparty->id]));

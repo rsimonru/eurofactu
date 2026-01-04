@@ -2,6 +2,8 @@
 
 namespace App\Traits;
 
+use App\Models\User;
+
 trait WithSorting
 {
     public $sortByField = '';
@@ -14,6 +16,11 @@ trait WithSorting
             : 'asc';
 
         $this->sortByField = $field;
+        if (isset($this->filter_name) && !empty($this->filter_name)) {
+            $this->filter['sort'] = $this->sortByField;
+            $this->filter['order'] = $this->sortDirection;
+            User::saveFilters($this->filter_name, $this->filter);
+        }
     }
 
     public function reverseSort()

@@ -2,15 +2,17 @@
 
 use App\Models\SalesBudget;
 use App\Models\SalesBudgetsProduct;
-use App\Models\Company;
-use App\Models\Thirdparty;
-use App\Models\State;
-use App\Models\ProductVariant;
 use App\Models\Select;
 use App\Models\TaxType;
 use Flux\Flux;
 use Livewire\Attributes\Computed;
 use Livewire\Volt\Component;
+use App\Classes\PdfFile;
+use App\Models\Product;
+use App\Models\ProductsVariant;
+use App\Notifications\SendBudget;
+use Illuminate\Support\Facades\Notification;
+use Livewire\Attributes\Reactive;
 
 new class extends Component {
     public ?SalesBudget $budget = null;
@@ -20,8 +22,10 @@ new class extends Component {
     // Line editing state
     public bool $editingLine = false;
     public ?int $editingLineId = null;
+    public ?int $line_product_id = null;
+    public ?int $line_product_variant_id = null;
     public string $line_description = '';
-    public $line_units = null;
+    public ?int $line_units = null;
     public $line_base_unit = null;
     public $line_discountp = null;
     public $line_tax_type = null;
@@ -52,6 +56,14 @@ new class extends Component {
 
     public array $lines = [];
 
+    public array $budget_emails = [];
+    public array $selected_budget_emails = [];
+    public string $new_budget_email = '';
+    public bool $openSendEmail = false;
+    public ?int $deleteId = null;
+    public bool $showDeleteModal = false;
+    public string $product_search = '';
+
     /**
      * Mount the component
      */
@@ -63,8 +75,10 @@ new class extends Component {
         if ($id) {
             $this->budget = SalesBudget::emtGet(
                 model_id: $id,
-                with: ['products']
+                with: ['products.product_variant.product.tax_type']
             );
+            $this->budget_emails = [$this->budget->thirdparty->email];
+            $this->selected_budget_emails = [$this->budget->thirdparty->email];
             $this->isEditing = true;
             $this->loadBudgetData();
         } else {
@@ -115,25 +129,113 @@ new class extends Component {
             'breadcrumbs' => [
                 ['label' => trans_choice('sales.sales', 2), 'url' => null],
                 ['label' => trans_choice('sales.budgets', 2), 'url' => route('sales.budgets.index')],
-                ['label' => $this->isEditing ? __('general.edit') : __('general.new'), 'url' => null],
+                ['label' => $this->isEditing ? $this->budget->number : __('general.new'), 'url' => null],
             ],
-            'thirdparties' => $this->getThirdparties(),
-            'states' => $this->getStates(),
-            'tax_types' => $this->getTaxTypes(),
         ];
     }
 
-    public function getThirdparties(): array
+    #[Computed]
+    public function products()
+    {
+        return Select::emtGet(
+            vcSelect: 'products',
+            search: $this->product_search,
+            selected: $this->line_product_id
+        );
+    }
+    #[Computed]
+    public function products_variants(): array
+    {
+        if ($this->line_product_id) {
+            $variants = Select::emtGet(
+                vcSelect: 'products_variants',
+                parameter1: $this->line_product_id
+            );
+            // if (length($variants) == 1) {
+            //     $this->line_product_variant_id = $variants[0]['value'];
+            // }
+            return $variants;
+        } else {
+            return [];
+        }
+    }
+    #[Computed]
+    public function thirdparties(): array
     {
         return Select::emtGet('thirdparties');
     }
-    public function getTaxTypes(): array
+    #[Computed]
+    public function tax_types(): array
     {
         return Select::emtGet('tax_types');
     }
-    public function getStates(): array
+    #[Computed]
+    public function states(): array
     {
-        return Select::emtGet('states', 'App\\Models\\Budget');
+        return Select::emtGet('states', SalesBudget::class);
+    }
+
+    public function updatingLineProductId($value)
+    {
+        $product = Product::emtGet(model_id: $value, with: ['variants']);
+        if (length($product->variants) == 1) {
+            $product_variant = $product->variants->first();
+            $this->line_product_variant_id = $product_variant->id;
+            $this->updateLineFields($product_variant);
+        } else {
+            $this->line_product_variant_id = null;
+        }
+    }
+    public function updatingLineProductVariantId($value)
+    {
+        $product_variant = ProductsVariant::find($value);
+        $this->updateLineFields($product_variant);
+    }
+    public function updateLineFields($product_variant)
+    {
+        if($product_variant) {
+            $this->line_description = $product_variant->product->description;
+            $this->line_base_unit = $product_variant->price;
+            $this->line_tax_type = $product_variant->product->tax_type->value;
+        }
+    }
+
+    public function downloadPDF()
+    {
+        $pdf = new PdfFile();
+        $pdf->documents = $this->budget;
+        $pdf->data = [
+            'company' => $this->budget->company,
+        ];
+        $data = $pdf->generateFromTemplate('pdf.budget');
+
+        return response()->streamDownload(
+            fn () => print($data),
+            'Presupuesto-'.$this->budget->number.'.pdf',
+            ['Content-Type' => 'application/pdf']
+        );
+    }
+    public function sendEmail()
+    {
+        if (length($this->selected_budget_emails) == 0) {
+            Flux::toast(variant: 'danger', text: __('general.add_email'));
+            return;
+        }
+        $pdf = new PdfFile();
+        $pdf->documents = $this->budget;
+        $pdf->data = [
+            'company' => $this->budget->company,
+        ];
+        $data = $pdf->generateFromTemplate('pdf.budget');
+
+        Notification::route('mail', $this->selected_budget_emails)->notify(new SendBudget($this->budget, $data));
+    }
+    public function createBudgetEmail()
+    {
+        $validated = $this->validate([
+            'new_budget_email' => 'required|email:rfc,dns',
+        ]);
+        $this->budget_emails[] = $validated['new_budget_email'];
     }
 
     /**
@@ -150,17 +252,19 @@ new class extends Component {
     }
 
     /**
-     * Start creating a new line
+     * Empty line
      */
-    public function addLine(): void
+    public function emptyLine($editingLine = false): void
     {
-        $this->editingLine = true;
+        $this->editingLine = $editingLine;
         $this->editingLineId = null;
+        $this->line_product_id = null;
+        $this->line_product_variant_id = null;
         $this->line_description = '';
         $this->line_units = 1;
         $this->line_base_unit = 0;
         $this->line_discountp = 0;
-        $this->line_tax_type = 0;
+        $this->line_tax_type = null;
     }
 
     /**
@@ -174,8 +278,12 @@ new class extends Component {
             return;
         }
 
+        $product_line = $this->budget->products->where('id', $lineId)->first();
+
         $this->editingLine = true;
         $this->editingLineId = $lineId;
+        $this->line_product_id = $product_line->product_variant->product_id ?? null;
+        $this->line_product_variant_id = $product_line->product_variant_id ?? null;
         $this->line_description = $line['description'] ?? '';
         $this->line_units = $line['units'] ?? 1;
         $this->line_base_unit = $line['base_unit'] ?? 0;
@@ -195,8 +303,9 @@ new class extends Component {
         }
 
         $validated = $this->validate([
+            'line_product_variant_id' => 'nullable|numeric|exists:products_variants,id',
             'line_description' => 'required|string',
-            'line_units' => 'required|integer|min:1',
+            'line_units' => 'required|integer|min:0',
             'line_base_unit' => 'required|numeric|min:0',
             'line_discountp' => 'nullable|numeric|min:0|max:100',
             'line_tax_type' => 'required|numeric|min:0|max:1',
@@ -223,6 +332,7 @@ new class extends Component {
 
         $lineData = [
             'sales_budget_id' => $this->budget->id,
+            'product_variant_id' => $this->line_product_variant_id,
             'description' => $this->line_description,
             'units' => $this->line_units,
             'base_unit' => $this->line_base_unit,
@@ -251,36 +361,26 @@ new class extends Component {
             Flux::toast(variant: 'success', text: __('sales.line_created'));
         }
 
-        $this->cancelLine();
+        $this->emptyLine(false);
         $this->loadLines();
-    }
-
-    /**
-     * Cancel line editing
-     */
-    public function cancelLine(): void
-    {
-        $this->editingLine = false;
-        $this->editingLineId = null;
-        $this->line_description = '';
-        $this->line_units = 1;
-        $this->line_base_unit = 0;
-        $this->line_discountp = 0;
-        $this->line_tax_type = 0;
     }
 
     /**
      * Delete a line
      */
-    public function deleteLine(int $lineId): void
+    public function doDelete(): void
     {
-        $line = SalesBudgetsProduct::find($lineId);
+        if ($this->deleteId) {
+            $line = SalesBudgetsProduct::find($this->deleteId);
 
-        if ($line) {
-            $line->delete();
-            Flux::toast(variant: 'success', text: __('sales.line_deleted'));
-            $this->loadLines();
+            if ($line) {
+                $line->delete();
+                Flux::toast(variant: 'success', text: __('sales.line_deleted'));
+                $this->loadLines();
+            }
         }
+        $this->deleteId = null;
+        $this->showDeleteModal = false;
     }
 
     /**
@@ -315,6 +415,11 @@ new class extends Component {
         if ($this->isEditing) {
             // Update existing budget
             $this->budget->update($validated);
+            $this->budget = SalesBudget::emtGet(
+                model_id: $this->budget->id,
+                with: ['products']
+            );
+            $this->loadBudgetData();
             Flux::toast(variant: 'success', text: __('sales.budget_updated'));
         } else {
             // Create new budget
@@ -336,12 +441,16 @@ new class extends Component {
 <section class="w-full h-full">
     <x-document.layout :title="$pageTitle" :breadcrumbs="$breadcrumbs">
         <x-slot:buttons>
-            <flux:button type="button" size="sm" variant="filled" wire:click="cancel">
-                {{ __('general.cancel') }}
+            <flux:button type="button" size="sm" variant="primary" color="blue" icon="file-pdf" class="cursor-pointer" wire:click="downloadPDF">
+                <span class="hidden md:inline">PDF</span>
             </flux:button>
 
-            <flux:button type="button" size="sm" variant="primary"  wire:click="save">
-                {{ __('general.save') }}
+            <flux:button type="button" size="sm" variant="primary" color="blue" icon="envelope" class="cursor-pointer" x-on:click="$wire.openSendEmail = true">
+                <span class="hidden md:inline">Email</span>
+            </flux:button>  
+
+            <flux:button type="button" size="sm" variant="primary" icon="save" class="cursor-pointer" wire:click="save">
+                <span class="hidden md:inline">{{ __('general.save') }}</span>
             </flux:button>
         </x-slot:buttons>
         <!-- Two-column layout: Form on left, Tabs on right (desktop), stacked on mobile -->
@@ -353,12 +462,12 @@ new class extends Component {
                         <flux:field class="lg:col-span-2">
                             <flux:select size="sm" wire:model="thirdparty_id" variant="listbox"
                                 searchable placeholder="{{ __('general.select') }}"
-                                label="{{ __('sales.customer') }} *"
+                                label="{{ __('sales.customer') }}"
                                 error="thirdparty_id">
                                 <x-slot name="search">
                                     <flux:select.search class="px-4" placeholder="{{ __('general.search') }}" />
                                 </x-slot>
-                                @foreach ($thirdparties as $thirdparty)
+                                @foreach ($this->thirdparties as $thirdparty)
                                     <flux:select.option value="{{ $thirdparty['value'] }}">{{ $thirdparty['option'] }}</flux:select.option>
                                 @endforeach
                             </flux:select>
@@ -368,13 +477,13 @@ new class extends Component {
                             wire:model="date" locale="es-ES" start-day="1" error="date" />
 
                         <flux:select size="sm" wire:model="state_id" variant="listbox"
-                            label="{{ __('general.state') }} *"
+                            label="{{ __('general.state') }}"
                             searchable placeholder="{{ __('general.select') }}"
                             error="state_id">
                             <x-slot name="search">
                                 <flux:select.search class="px-4" placeholder="{{ __('general.search') }}" />
                             </x-slot>
-                            @foreach ($states as $state)
+                            @foreach ($this->states as $state)
                                 <flux:select.option value="{{ $state['value'] }}">{{ $state['option'] }}</flux:select.option>
                             @endforeach
                         </flux:select>
@@ -385,7 +494,7 @@ new class extends Component {
                             error="valid_until"
                             start-day="1" />
 
-                        <flux:date-picker size="sm" wire:model="sent_date" locale="es-ES"
+                        <flux:date-picker size="sm" wire:model="sent_date" locale="es-ES" clearable
                             label="{{ __('sales.sent_date') }}"
                             start-day="1"
                             error="sent_date"
@@ -403,7 +512,7 @@ new class extends Component {
                         <flux:tab.panel name="lines-tab" class="pt-1!">
                             <div class="space-y-4">
                                 <div class="flex justify-end">
-                                    <flux:button size="sm" variant="primary" wire:click="addLine" icon="plus">
+                                    <flux:button size="sm" variant="primary" wire:click="emptyLine(true)" icon="plus" class="cursor-pointer">
                                         {{ __('sales.add_line') }}
                                     </flux:button>
                                 </div>
@@ -411,7 +520,7 @@ new class extends Component {
                                 @if(count($lines) > 0)
                                     <flux:table>
                                         <flux:table.columns sticky>
-                                            <flux:table.column align="center" class="w-2/5">{{ __('sales.description') }}</flux:table.column>
+                                            <flux:table.column align="center" class="w-1/2 md:w-1/4">{{ __('sales.description') }}</flux:table.column>
                                             <flux:table.column align="center">{{ __('sales.units') }}</flux:table.column>
                                             <flux:table.column align="center">{{ __('sales.price_unit') }}</flux:table.column>
                                             <flux:table.column align="center">{{ __('sales.discount') }}</flux:table.column>
@@ -423,30 +532,34 @@ new class extends Component {
                                         <flux:table.rows>
                                             @foreach($lines as $line)
                                                 <flux:table.row :key="$line['id']">
-                                                    <flux:table.cell>
-                                                        <div class="text-sm">{{ $line['description'] }}</div>
+                                                    <flux:table.cell class="w-1/2 md:w-1/4">
+                                                        <a href="#" class="text-sm font-bold block text-wrap" wire:click="editLine({{ $line['id'] }})">{{ $line['description'] }}</a>
                                                     </flux:table.cell>
-                                                    <flux:table.cell class="text-right">{{ number_format($line['units'], 0) }}</flux:table.cell>
-                                                    <flux:table.cell class="text-right">{{ number_format($line['base_unit'], 2, ",", ".") }}€</flux:table.cell>
-                                                    <flux:table.cell class="text-right">{{ number_format($line['discountp']* 100, 2, ",", ".") }}%</flux:table.cell>
-                                                    <flux:table.cell class="text-right">{{ number_format($line['tax_type'] * 100, 2, ",", ".") }}%</flux:table.cell>
-                                                    <flux:table.cell class="text-right font-semibold">{{ number_format($line['base_line'], 2, ",", ".") }}€</flux:table.cell>
-                                                    <flux:table.cell class="flex gap-1 justify-end">
-                                                        <flux:button
-                                                            size="sm"
-                                                            variant="ghost"
-                                                            icon="pencil"
-                                                            wire:click="editLine({{ $line['id'] }})"
-                                                            tooltip="{{ __('general.edit') }}"
-                                                        />
-                                                        <flux:button
-                                                            size="sm"
-                                                            variant="danger"
-                                                            icon="trash"
-                                                            wire:click="deleteLine({{ $line['id'] }})"
-                                                            wire:confirm="{{ __('general.confirm_delete') }}"
-                                                            tooltip="{{ __('general.delete') }}"
-                                                        />
+                                                    <flux:table.cell class="text-right">{{ $line['units'] ? number_format($line['units'], 0) : "-" }}</flux:table.cell>
+                                                    <flux:table.cell class="text-right">{{ $line['units'] ? number_format($line['base_unit'], 2, ",", ".")."€" : "-" }}</flux:table.cell>
+                                                    <flux:table.cell class="text-right">{{ $line['units'] ? number_format($line['discountp']* 100, 2, ",", ".")."%" : "-" }}</flux:table.cell>
+                                                    <flux:table.cell class="text-right">{{ $line['units'] ? number_format($line['tax_type'] * 100, 2, ",", ".")."%" : "-" }}</flux:table.cell>
+                                                    <flux:table.cell class="text-right font-semibold">{{ $line['units'] ? number_format($line['total_line'], 2, ",", ".")."€" : "-" }}</flux:table.cell>
+                                                    <flux:table.cell class="justify-end align-middle">
+                                                        <span>
+                                                            <flux:button
+                                                                size="sm"
+                                                                variant="ghost"
+                                                                icon="pencil"
+                                                                class="cursor-pointer"
+                                                                wire:click="editLine({{ $line['id'] }})"
+                                                                tooltip="{{ __('general.edit') }}"
+                                                            />
+                                                            <flux:button
+                                                                size="sm"
+                                                                variant="danger"
+                                                                icon="trash"
+                                                                class="cursor-pointer"
+                                                                x-on:click="$wire.showDeleteModal = true; $wire.deleteId = {{ $line['id'] }};"
+                                                                wire:confirm="{{ __('general.confirm_delete') }}"
+                                                                tooltip="{{ __('general.delete') }}"
+                                                            />
+                                                        </span>
                                                     </flux:table.cell>
                                                 </flux:table.row>
                                             @endforeach
@@ -539,48 +652,107 @@ new class extends Component {
                 </form>
             </div>
         </div>
-        <flux:modal class="md:max-w-[50vw]!" wire:model.self="editingLine">
-            <div class="space-y-6">
-                <div class="space-y-4">
-                    <flux:field>
-                        <flux:label>{{ __('sales.description') }} *</flux:label>
-                        <flux:textarea wire:model="line_description" rows="2" size="sm" />
-                        <flux:error name="line_description" />
-                    </flux:field>
+        <x-slot:modals>
+            <flux:modal class="w-[95%]! md:w-auto! md:max-w-[50vw]!" wire:model.self="editingLine">
+                <div class="space-y-6">
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-2 gap-2">
+                            <flux:select size="sm" wire:model.live="line_product_id" variant="listbox" searchable clearable
+                                label="{{ trans_choice('general.products', 1) }}"
+                                empty="{{ __('general.no_products_found') }}"
+                                placeholder="{{ __('general.select') }}">
+                                <x-slot name="search">
+                                    <flux:select.search class="px-4" placeholder="{{ __('general.search') }}" />
+                                </x-slot>
 
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <flux:input :label="__('sales.units')" mask:dynamic="$money($input, ',')"
-                            wire:model="line_units" size="sm" error="line_units"
-                            class:input="text-right" />
+                                @foreach ($this->products as $product)
+                                    <flux:select.option :value="$product['value']">{{ $product['option'] }}</flux:select.option>
+                                @endforeach
+                            </flux:select>
+                            @if ($this->line_product_id)
+                            <flux:select size="sm" wire:model.live="line_product_variant_id" variant="listbox" searchable clearable
+                                label="{{ trans_choice('general.variants', 1) }}"
+                                empty="{{ __('general.no_variants_found') }}"
+                                placeholder="{{ __('general.select') }}">
+                                <x-slot name="search">
+                                    <flux:select.search class="px-4" placeholder="{{ __('general.search') }}" />
+                                </x-slot>
 
-                        <flux:input label="{{ __('sales.price_unit') }} (€)" mask:dynamic="$money($input, ',')"
-                            wire:model="line_base_unit" size="sm" error="line_base_unit"
-                            class:input="text-right" />
+                                @foreach ($this->products_variants as $product_variant)
+                                    <flux:select.option :value="$product_variant['value']">{{ $product_variant['option'] }}</flux:select.option>
+                                @endforeach
+                            </flux:select>
+                            @endif
+                        </div>
 
-                        <flux:input label="{{ __('sales.discount') }} (%)" mask:dynamic="$money($input, ',')"
-                            wire:model="line_discountp" size="sm" error="line_discountp"
-                            class:input="text-right" />
+                        <flux:textarea wire:model="line_description" rows="2" size="sm"
+                            label="{{ __('sales.description') }}"
+                            error="line_description"
+                        />
 
-                        <flux:select size="sm" wire:model="line_tax_type" variant="listbox"
-                            label="{{ __('sales.tax') }} (%)"
-                            placeholder="{{ __('general.select') }}"
-                            error="line_tax_type">
-                            @foreach ($tax_types as $tax_types)
-                                <flux:select.option value="{{ $tax_types['value'] }}">{{ $tax_types['option'] }}</flux:select.option>
-                            @endforeach
-                        </flux:select>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <flux:input :label="__('sales.units')" mask:dynamic="$money($input, ',')"
+                                wire:model="line_units" size="sm" error="line_units"
+                                class:input="text-right" />
+
+                            <flux:input label="{{ __('sales.price_unit') }} (€)" mask:dynamic="$money($input, ',')"
+                                wire:model="line_base_unit" size="sm" error="line_base_unit"
+                                class:input="text-right" />
+
+                            <flux:input label="{{ __('sales.discount') }} (%)" mask:dynamic="$money($input, ',')"
+                                wire:model="line_discountp" size="sm" error="line_discountp" min-value="0" max-value="100"
+                                class:input="text-right" />
+
+                            <flux:select size="sm" wire:model="line_tax_type" variant="listbox"
+                                label="{{ __('sales.tax') }} (%)"
+                                placeholder="{{ __('general.select') }}"
+                                error="line_tax_type">
+                                @foreach ($this->tax_types as $tax_types)
+                                    <flux:select.option value="{{ $tax_types['value'] }}">{{ $tax_types['option'] }}</flux:select.option>
+                                @endforeach
+                            </flux:select>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <flux:spacer />
+                        <flux:modal.close>
+                            <flux:button size="sm" variant="ghost" wire:click="emptyLine(false)">{{ __('general.cancel') }}</flux:button>
+                        </flux:modal.close>
+                        <flux:button size="sm" variant="primary" wire:click="saveLine">
+                            {{ __('general.save') }}
+                        </flux:button>
                     </div>
                 </div>
-                <div class="flex gap-2">
-                    <flux:spacer />
-                    <flux:modal.close>
-                        <flux:button size="sm" variant="ghost" wire:click="cancelLine">{{ __('general.cancel') }}</flux:button>
-                    </flux:modal.close>
-                    <flux:button size="sm" variant="primary" wire:click="saveLine">
-                        {{ __('general.save') }}
-                    </flux:button>
+            </flux:modal>
+            <flux:modal class="md:w-96" name="send-email" wire:model.self="openSendEmail">
+                <div class="space-y-6">
+                    <div>
+                        <flux:heading size="lg">{{ __('sales.send_budget') }}</flux:heading>
+                    </div>
+                    <div>
+                        <flux:pillbox size="sm" wire:model="selected_budget_emails" variant="combobox" multiple label="Email">
+                            <x-slot name="input">
+                                <flux:pillbox.input size="sm" wire:model="new_budget_email" placeholder="Email" />
+                            </x-slot>
+                            @foreach ($this->budget_emails as $budget_email)
+                                <flux:pillbox.option :value="$budget_email">{{ $budget_email }}</flux:pillbox.option>
+                            @endforeach
+                            <flux:pillbox.option.create wire:click="createBudgetEmail" min-length="3">
+                                {{ __('general.add') }} "<span wire:text="new_budget_email"></span>"
+                            </flux:pillbox.option.create>
+                        </flux:pillbox>
+                    </div>
+                    <div class="flex gap-2">
+                        <flux:spacer />
+                        <flux:modal.close>
+                        <flux:button size="sm" variant="primary" wire:click="sendEmail" icon="envelope">
+                            {{ __('general.send') }}
+                        </flux:button>
+                        </flux:modal.close>
+                    </div>
                 </div>
-            </div>
-        </flux:modal>
+            </flux:modal>
+            <x-delete-modal wire:model="showDeleteModal" />
+        </x-slot:modals>
     </x-document.layout>
 </section>

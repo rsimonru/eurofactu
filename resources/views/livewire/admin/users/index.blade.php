@@ -10,6 +10,7 @@ new class extends Component {
     use WithSorting;
 
     public string $search = '';
+    public array $selected = [];
 
     public function mount() {
         $this->sortByField = 'name';
@@ -67,62 +68,85 @@ new class extends Component {
             </flux:button>
         </x-slot:buttons>
         <!-- Users Table (Flux component) -->
-        <flux:table container:class="max-h-80" :paginate="$users">
-            <flux:table.columns sticky >
-                <flux:table.column sortable :sorted="$sortByField === 'name'" :direction="$sortDirection" wire:click="sortBy('name')">{{ __('general.name') }}</flux:table.column>
-                <flux:table.column sortable :sorted="$sortByField === 'email'" :direction="$sortDirection" wire:click="sortBy('email')">{{ __('general.email') }}</flux:table.column>
-                <flux:table.column sortable :sorted="$sortByField === 'created_at'" :direction="$sortDirection" wire:click="sortBy('created_at')">{{ __('general.created_at') }}</flux:table.column>
-                <flux:table.column>{{ __('general.actions') }}</flux:table.column>
-            </flux:table.columns>
+        <flux:checkbox.group>
+            <flux:table container:class="max-h-80" :paginate="$users">
+                <flux:table.columns sticky class="bg-white dark:bg-zinc-900 mx-2">
+                    <flux:table.column align="center">
+                        <flux:checkbox.all />
+                    </flux:table.column>
+                    <flux:table.column align="center" sortable :sorted="$sortByField === 'name'" :direction="$sortDirection" wire:click="sortBy('name')">{{ __('general.name') }}</flux:table.column>
+                    <flux:table.column align="center" sortable :sorted="$sortByField === 'email'" :direction="$sortDirection" wire:click="sortBy('email')">{{ __('general.email') }}</flux:table.column>
+                    <flux:table.column align="center" sortable :sorted="$sortByField === 'created_at'" :direction="$sortDirection" wire:click="sortBy('created_at')">{{ __('general.created_at') }}</flux:table.column>
+                    <flux:table.column align="center" sortable :sorted="$sortByField === 'last_login'" :direction="$sortDirection" wire:click="sortBy('last_login')">{{ __('general.last_login') }}</flux:table.column>
+                    <flux:table.column align="center" >{{ __('general.state') }}</flux:table.column>
+                    <flux:table.column align="center"></flux:table.column>
+                </flux:table.columns>
 
-            <flux:table.rows>
-                @forelse($users as $user)
-                    <flux:table.row :key="$user->id">
-                        <flux:table.cell>
-                            <div class="flex items-center gap-3">
-                                <flux:avatar
-                                    size="sm"
-                                    :src="'https://ui-avatars.com/api/?name=' . urlencode($user->name) . '&background=random'"
-                                />
-                                <div>
-                                    <div class="font-medium">{{ $user->name }}</div>
-                                    @if($user->id === auth()->id())
-                                        <flux:badge size="sm" color="blue">{{ __('general.you') }}</flux:badge>
+                <flux:table.rows>
+                    @forelse($users as $user)
+                        <flux:table.row :key="$user->id">
+                            <flux:table.cell>
+                                <flux:checkbox wire:model="selected" value="{{ $user->id }}" />
+                            </flux:table.cell>
+                            <flux:table.cell>
+                                <div class="flex items-center gap-3">
+                                    <flux:avatar
+                                        size="sm"
+                                        :src="'https://ui-avatars.com/api/?name=' . urlencode($user->name) . '&background=random'"
+                                    />
+                                    <div>
+                                        <a class="font-medium" href="{{ route('admin.users.edit', $user->id) }}">{{ $user->name }}</a>
+                                        {{-- @if($user->id === auth()->id())
+                                            <flux:badge size="sm" color="blue">{{ __('general.you') }}</flux:badge>
+                                        @endif --}}
+                                    </div>
+                                </div>
+                            </flux:table.cell>
+
+                            <flux:table.cell>{{ $user->email }}</flux:table.cell>
+
+                            <flux:table.cell>
+                                <flux:tooltip :content="$user->created_at->format('Y-m-d H:i:s')">
+                                    {{ $user->created_at->diffForHumans() }}
+                                </flux:tooltip>
+                            </flux:table.cell>
+
+                            <flux:table.cell>
+                                <flux:tooltip :content="$user->last_login->format('Y-m-d H:i:s')">
+                                    {{ $user->last_login->diffForHumans() }}
+                                </flux:tooltip>
+                            </flux:table.cell>
+
+                            <flux:table.cell class="text-center">
+                                <flux:badge :color="$user->active ? 'green' : 'red'" size="sm">
+                                    {{ $user->active ? __('general.active') : __('general.inactive') }}
+                                </flux:badge>
+                            </flux:table.cell>
+
+                            <flux:table.cell>
+                                <div class="flex gap-2 justify-center">
+                                    <flux:button size="sm" variant="filled" icon="pencil" :href="route('admin.users.edit', $user->id)" wire:navigate />
+
+                                    @if($user->id !== auth()->id())
+                                        <flux:button size="sm" variant="danger" icon="trash" />
                                     @endif
                                 </div>
-                            </div>
-                        </flux:table.cell>
-
-                        <flux:table.cell>{{ $user->email }}</flux:table.cell>
-
-                        <flux:table.cell>
-                            <flux:tooltip :content="$user->created_at->format('Y-m-d H:i:s')">
-                                {{ $user->created_at->diffForHumans() }}
-                            </flux:tooltip>
-                        </flux:table.cell>
-                        <flux:table.cell>
-                            <div class="flex gap-2">
-                                <flux:button size="sm" variant="filled" icon="pencil" :href="route('admin.users.edit', $user->id)" wire:navigate />
-
-                                @if($user->id !== auth()->id())
-                                    <flux:button size="sm" variant="danger" icon="trash" />
-                                @endif
-                            </div>
-                        </flux:table.cell>
-                    </flux:table.row>
-                @empty
-                    <flux:table.row>
-                        <flux:table.cell colspan="4">
-                            <div class="flex flex-col items-center gap-2 py-8">
-                                <flux:icon.users class="size-12" variant="outline" />
-                                <p class="text-sm text-zinc-500 dark:text-zinc-400">
-                                    {{ __('general.no_records_found') }}
-                                </p>
-                            </div>
-                        </flux:table.cell>
-                    </flux:table.row>
-                @endforelse
-            </flux:table.rows>
-        </flux:table>
+                            </flux:table.cell>
+                        </flux:table.row>
+                    @empty
+                        <flux:table.row>
+                            <flux:table.cell colspan="4">
+                                <div class="flex flex-col items-center gap-2 py-8">
+                                    <flux:icon.users class="size-12" variant="outline" />
+                                    <p class="text-sm text-zinc-500 dark:text-zinc-400">
+                                        {{ __('general.no_records_found') }}
+                                    </p>
+                                </div>
+                            </flux:table.cell>
+                        </flux:table.row>
+                    @endforelse
+                </flux:table.rows>
+            </flux:table>
+        </flux:checkbox.group>
     </x-documents.layout>
 </section>

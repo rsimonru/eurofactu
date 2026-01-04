@@ -17,7 +17,9 @@ return new class extends Migration
             $table->string('description', 200);
             $table->string('sku', 50)->nullable();
             $table->string('barcode', 25)->nullable();
+            $table->decimal('price', 12, 3);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

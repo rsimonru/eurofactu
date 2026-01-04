@@ -11,32 +11,30 @@
                 <x-app-logo />
             </a>
 
+            <livewire:company.select />
+
             <flux:navlist variant="outline">
                 <flux:navlist.group :heading="__('admin.admin')" class="grid">
                     <flux:navlist.item icon="users" :href="route('admin.users.index')" :current="request()->routeIs('admin.users.index')" wire:navigate>{{ trans_choice('admin.users', 2) }}</flux:navlist.item>
+                    <flux:navlist.item icon="building-office" :href="route('admin.company.edit')" :current="request()->routeIs('admin.company.edit')" wire:navigate>{{ trans_choice('general.companies', 1) }}</flux:navlist.item>
                 </flux:navlist.group>
                 <flux:navlist.group :heading="trans_choice('thirdparties.thirdparties', 2)" class="grid">
                     <flux:navlist.item icon="building-office-2" :href="route('thirdparties.index')" :current="request()->routeIs('thirdparties.index')" wire:navigate>{{ trans_choice('thirdparties.thirdparties', 2) }}</flux:navlist.item>
                 </flux:navlist.group>
+    
+                <flux:navlist.group :heading="trans_choice('products.products', 2)" class="grid">
+                    <flux:navlist.item icon="archive-box" :href="route('products.index')" :current="request()->routeIs('products.index')" wire:navigate>{{ trans_choice('products.products', 2) }}</flux:navlist.item>
+                </flux:navlist.group>
                 <flux:navlist.group :heading="trans_choice('sales.sales', 2)" class="grid">
-                    <flux:navlist.item icon="users" :href="route('sales.budgets.index')" :current="request()->routeIs('sales.budgets.index')" wire:navigate>{{ trans_choice('sales.budgets', 2) }}</flux:navlist.item>
+                    <flux:navlist.item icon="document-text" :href="route('sales.budgets.index')" :current="request()->routeIs('sales.budgets.index')" wire:navigate>{{ trans_choice('sales.budgets', 2) }}</flux:navlist.item>
                 </flux:navlist.group>
             </flux:navlist>
 
             <flux:spacer />
 
-            <flux:navlist variant="outline">
-                <flux:navlist.item icon="folder-git-2" href="https://github.com/laravel/livewire-starter-kit" target="_blank">
-                {{ __('Repository') }}
-                </flux:navlist.item>
-
-                <flux:navlist.item icon="book-open-text" href="https://laravel.com/docs/starter-kits#livewire" target="_blank">
-                {{ __('Documentation') }}
-                </flux:navlist.item>
-            </flux:navlist>
 
             <!-- Desktop User Menu -->
-            <flux:dropdown class="hidden lg:block" position="bottom" align="start">
+            <flux:dropdown class="hidden lg:block" position="bottom" align="start" size="sm">
                 <flux:profile
                     :name="auth()->user()->name"
                     :initials="auth()->user()->initials()"
@@ -63,6 +61,14 @@
                             </div>
                         </div>
                     </flux:menu.radio.group>
+
+                    <flux:menu.separator />
+
+                    <flux:radio.group x-data variant="segmented" x-model="$flux.appearance">
+                        <flux:radio value="light" icon="sun"></flux:radio>
+                        <flux:radio value="dark" icon="moon"></flux:radio>
+                        <flux:radio value="system" icon="computer-desktop"></flux:radio>
+                    </flux:radio.group>
 
                     <flux:menu.separator />
 
@@ -113,6 +119,14 @@
                             </div>
                         </div>
                     </flux:menu.radio.group>
+
+                    <flux:menu.separator />
+
+                    <flux:radio.group x-data variant="segmented" x-model="$flux.appearance">
+                        <flux:radio value="light" icon="sun"></flux:radio>
+                        <flux:radio value="dark" icon="moon"></flux:radio>
+                        <flux:radio value="system" icon="computer-desktop"></flux:radio>
+                    </flux:radio.group>
 
                     <flux:menu.separator />
 

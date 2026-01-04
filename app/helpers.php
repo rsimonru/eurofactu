@@ -127,16 +127,22 @@ if (!function_exists('emt_contains')) {
 
 if (!function_exists('string2decimal')) {
     function string2decimal($value) {
-        $number = str_replace(',','.',str_replace('.','',$value));
+        $number = str_replace(',', '.', str_replace('.', '', $value));
         $number = str_replace('%', '', $number);
 		$number = str_replace('€', '', $number);
         $number = trim($number);
-        return (is_numeric($number) ? $number*1:false);
+        return (is_numeric($number) ? $number *1 : false);
     }
 }
 if (!function_exists('decimal2string')) {
-    function decimal2string($value) {
-        return number_format($value,2,',','.');
+    function decimal2string($value, $format = 'number2') {
+		if ($format == 'number2') {
+			return number_format($value, 2, ',', '.');
+		} elseif ($format == 'euro2') {
+			return number_format($value, 2, ',', '.') . ' €';
+		} elseif ($format == 'percent2') {
+			return number_format($value * 100, 2, ',', '.') . ' %';
+		}
     }
 }
 

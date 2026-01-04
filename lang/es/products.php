@@ -1,0 +1,22 @@
+<?php
+return [
+    'products' => 'Producto|Productos',
+    'variants' => 'Variante|Variantes',
+    'create_product' => 'Crear Producto',
+    'edit_product' => 'Editar Producto',
+    'product_created' => 'Producto creado correctamente',
+    'product_updated' => 'Producto actualizado correctamente',
+    'product_deleted' => 'Producto eliminado correctamente',
+    'search_products' => 'Buscar productos',
+    'filter_products' => 'Filtrar productos',
+    'reference' => 'Referencia',
+    'description' => 'Descripción',
+    'price' => 'Precio',
+    'stock' => 'Stock',
+    'tax_type' => 'Tipo de Impuesto',
+    'company' => 'Empresa',
+    'enter_reference' => 'Ingrese referencia',
+    'enter_description' => 'Ingrese descripción',
+    'enter_price' => 'Ingrese precio',
+    'select_tax_type' => 'Seleccione tipo de impuesto',
+];

@@ -10,6 +10,8 @@ return [
     'two_factor_auth' => 'Two-Factor Auth',
     'profile_and_account_settings' => 'Manage your profile and account settings',
     'more_info' => 'More info',
+    'companies' => 'Company|Companies',
+    'saved_successfully' => 'Saved successfully.',
 
     // Common fields/actions
     'name' => 'Name',
@@ -17,8 +19,11 @@ return [
     'you' => 'You',
     'created_at' => 'Created At',
     'active' => 'Active',
+    'inactive' => 'Inactive',
+    'last_login' => 'Last Login',
     'actions' => 'Actions',
     'new' => 'New',
+    'add' => 'Add',
     'search' => 'Search',
     'select' => 'Select',
     'save' => 'Save',
@@ -29,11 +34,17 @@ return [
     'confirm' => 'Confirm',
     'continue' => 'Continue',
     'edit' => 'Edit',
+    'delete' => 'Delete',
+    'filter' => 'Filter',
+    'delete_filter' => 'Delete filter',
+    'filters' => 'Filter|Filters',
+    'send' => 'Send',
     'date' => 'Date',
     'state' => 'State',
     'are_you_sure' => 'Are you sure?',
-    'confirm_delete' => 'Are you sure you want to delete this record? This action cannot be undone.',
-    'delete' => 'Delete',
+    'confirm_delete' => 'Are you sure you want to delete the selected record? This action cannot be undone.',
+    'selected' => 'selected', 
+    'thirdparties' => 'Thirdparty|Thirdparties',
 
 
     // Appearance
@@ -79,4 +90,11 @@ return [
     'enter_code_manually' => 'or, enter the code manually',
 
     'no_records_found' => 'No records found.',
+    'add_email' => 'Add one or more email addresses',
+    'no_products_found' => 'No products found.',
+    'no_variants_found' => 'No variants found.',
+    'products' => 'Product|Products',
+    'variants' => 'Variant|Variants',
+    'no_product_selected' => 'No product selected.',
+    'no_variant_selected' => 'No variant selected.',
 ];

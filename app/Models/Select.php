@@ -39,7 +39,9 @@ class Select extends Model
         $parameter1 = '',
         $parameter2 = '',
         $parameter3 = '',
-        $parameter4 = ''
+        $parameter4 = '',
+        $search = '',
+        $selected = null
     ) {
 
         $oSelect = null;
@@ -106,6 +108,31 @@ class Select extends Model
                     ["value" => 10, "option" => "Octubre"], ["value" => 11, "option" => "Noviembre"], ["value" => 12, "option" => "Diciembre"]
                 ];
                 break;
+            case "products":
+                $oSelect = Product::select('products.id as value', 'products.description as option')
+                    ->when(!empty($search), function ($query) use ($search) {
+                        $query->where('products.description', 'like', '%'.$search.'%');
+                    })
+                    ->when($selected, function ($query) use ($selected) {
+                        $query->where('products.id', '>', 0)->orWhereInto('products.id', $selected);
+                    })
+                    ->orderBy('products.description', 'asc')->get()
+                    ->toArray();
+                break;
+            case "products_variants":
+                $oSelect = ProductsVariant::select('products_variants.id as value', 'products_variants.description as option')
+                    ->when(!empty($parameter1), function ($query) use ($parameter1) {
+                        $query->where('products_variants.product_id', $parameter1);
+                    })
+                    ->when(!empty($search), function ($query) use ($search) {
+                        $query->where('products_variants.description', 'like', '%'.$search.'%');
+                    })
+                    ->when($selected, function ($query) use ($selected) {
+                        $query->where('products_variants.id', '>', 0)->orWhereInto('products_variants.id', $selected);
+                    })
+                    ->orderBy('products_variants.description', 'asc')->get()
+                    ->toArray();
+                break;
             case "provinces":
                 $oSelect = Province::select('id as value', 'province as option')
                     ->orderBy('id', 'asc')
@@ -113,15 +140,23 @@ class Select extends Model
                 break;
             case "states":
                 $oSelect = State::select('states.id as value', 'states.description->'.app()->getLocale().' as option')
-                    ->join('states_models as sm', function ($join) use ($parameter1) {
-                        $join->on( 'sm.states_id', 'states.id')
-                        ->where('sm.model', $parameter1);
+                    ->when(!empty($parameter1), function ($query) use ($parameter1) {
+                        $query->join('states_models as sm', function ($join) use ($parameter1) {
+                            $join->on( 'sm.states_id', 'states.id')
+                                ->where('sm.model', $parameter1)
+                                ->orderBy('sm.order', 'asc');
+                        });
                     })
-                    ->orderBy('sm.order', 'asc')
+                    ->orderBy('states.description->'.app()->getLocale(), 'asc')
                     ->get()->toArray();
                 break;
             case "tax_types":
                 $oSelect = TaxType::select('value as value', 'type as option')
+                    ->orderBy('order', 'asc')
+                    ->get()->toArray();
+                break;
+            case "tax_types_ids":
+                $oSelect = TaxType::select('id as value', 'type as option')
                     ->orderBy('order', 'asc')
                     ->get()->toArray();
                 break;
@@ -133,8 +168,14 @@ class Select extends Model
                     ->when(!empty($parameter2), function ($query) {
                         $query->where('thirdparties.is_supplier', true);
                     })
-                    ->orderBy('thirdparties.legal_form', 'asc')
-                    ->get()->toArray();
+                    ->when(!empty($search), function ($query) use ($search) {
+                        $query->where('thirdparties.legal_form', 'like', '%'.$search.'%');
+                    })
+                    ->when($selected, function ($query) use ($selected) {
+                        $query->where('thirdparties.id', '>', 0)->orWhereIn('thirdparties.id', $selected);
+                    })
+                    ->orderBy('thirdparties.legal_form', 'asc')->get()
+                    ->toArray();
                 break;
             case "users":
                 $oSelect = User::select('users.id as value', 'users.name as option')

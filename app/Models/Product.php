@@ -12,6 +12,17 @@ class Product extends Model
     use SoftDeletes;
     use WithExtensions;
 
+    protected $fillable = [
+        'company_id',
+        'tax_type_id',
+        'reference',
+        'description',
+        'price',
+    ];
+
+    protected $casts = [
+    ];
+
     /**
      * Get records.
      *
@@ -53,9 +64,29 @@ class Product extends Model
         $query->when(isset($filters['product_ids']) && !empty($filters['product_ids']), function($query) use ($filters) {
             $query->whereIn('products.id', $filters['product_ids']);
         })
-        ;
+        ->when(isset($filters['search']) && !empty($filters['search']), function($query) use ($filters) {
+            return $query->where(function ($query) use ($filters){
+                $query->where('products.reference', 'like', '%'.$filters['search'].'%')
+                ->orWhere('products.description', 'like', '%'.$filters['search'].'%');
+            });
+        });
 
         return $query;
+    }
+
+    public function tax_type()
+    {
+        return $this->belongsTo(TaxType::class);
+    }
+
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
+    }
+
+    public function variants()
+    {
+        return $this->hasMany(ProductsVariant::class);
     }
 
 }

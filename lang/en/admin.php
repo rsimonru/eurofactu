@@ -30,4 +30,16 @@ return [
     'assign_roles_description' => 'Assign roles to this user to grant specific permissions.',
     'assign_permissions_description' => 'Grant individual permissions to this user.',
     'activity_log_description' => 'View the activity log for this user.',
+
+    'edit_company' => 'Edit Company',
+    'company_updated' => 'Company updated successfully.',   
+    'vat' => 'VAT',
+    'legal_form' => 'Legal Form',
+    'address' => 'Address',
+    'zip' => 'Zip',
+    'town' => 'Town',
+    'province' => 'Province',
+    'phone' => 'Phone',
+    'email' => 'Email',
+    'web' => 'Web',
 ];

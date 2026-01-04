@@ -11,9 +11,15 @@
         'create_budget' => 'Crear Presupuesto',
         'edit_budget' => 'Editar Presupuesto',
         'search_budgets' => 'Buscar presupuestos',
+        'filter_budgets' => 'Filtrar presupuestos',
         'budget_created' => 'Presupuesto creado correctamente',
         'budget_updated' => 'Presupuesto actualizado correctamente',
         'budget_lines_placeholder' => 'Las líneas de presupuesto estarán disponibles después de crear el presupuesto',
+        'select_budgets' => 'Seleccione al menos un presupuesto',
+        'detail_of_budget' => 'Detalle del presupuesto',
+        'detail_of_order' => 'Detalle del pedido',
+        'detail_of_note' => 'Detalle del albarán',
+        'detail_of_invoice' => 'Detalle de la factura',
 
         // Fields
         'number' => 'Número',
@@ -60,4 +66,6 @@
         'enter_reference' => 'Introducir referencia',
         'enter_observations' => 'Introducir observaciones',
         'enter_internal_note' => 'Introducir nota interna',
+
+        'send_budget' => 'Enviar presupuesto',
     ];

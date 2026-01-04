@@ -2,10 +2,11 @@
 
 return [
     // Page titles
-    'thirdparties' => 'Third Parties',
-    'create_thirdparty' => 'Create third party',
-    'edit_thirdparty' => 'Edit third party',
-    'search_thirdparties' => 'Search third parties',
+    'thirdparties' => 'Thirdparties',
+    'create_thirdparty' => 'Create thirdparty',
+    'edit_thirdparty' => 'Edit thirdparty',
+    'search_thirdparties' => 'Search thirdparties',
+    'filter_thirdparties' => 'Filter thirdparties',
 
     // Messages
     'thirdparty_created' => 'Third party created successfully',
@@ -27,8 +28,8 @@ return [
     'email' => 'Email',
     'invoice_email' => 'Invoice Email',
     'observations' => 'Observations',
-    'is_customer' => 'Is Customer',
-    'is_supplier' => 'Is Supplier',
+    'is_customer' => 'Is customer',
+    'is_supplier' => 'Is supplier',
     'customer' => 'Customer',
     'supplier' => 'Supplier',
     'type' => 'Type',

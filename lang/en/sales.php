@@ -11,9 +11,15 @@
         'create_budget' => 'Create Budget',
         'edit_budget' => 'Edit Budget',
         'search_budgets' => 'Search budgets',
+        'filter_budgets' => 'Filter budgets',
         'budget_created' => 'Budget created successfully',
         'budget_updated' => 'Budget updated successfully',
         'budget_lines_placeholder' => 'Budget lines will be available after creating the budget',
+        'select_budgets' => 'Select at least one budget',
+        'detail_of_budget' => 'Detail of budget',
+        'detail_of_order' => 'Detail of order',
+        'detail_of_note' => 'Detail of note',
+        'detail_of_invoice' => 'Detail of invoice',
 
         // Fields
         'number' => 'Number',
@@ -60,4 +66,6 @@
         'enter_reference' => 'Enter reference',
         'enter_observations' => 'Enter observations',
         'enter_internal_note' => 'Enter internal note',
+
+        'send_budget' => 'Send budget',
     ];
