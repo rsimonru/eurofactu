@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
         $this->call(CountriesSeeder::class);
         $this->call(StatesModelsTableSeeder::class);
         $this->call(StatesTableSeeder::class);
+        $this->call(TaxesTableSeeder::class);
         $this->call(TaxTypesTableSeeder::class);
     }
 }

@@ -18,13 +18,12 @@
                     <flux:navlist.item icon="users" :href="route('admin.users.index')" :current="request()->routeIs('admin.users.index')" wire:navigate>{{ trans_choice('admin.users', 2) }}</flux:navlist.item>
                     <flux:navlist.item icon="building-office" :href="route('admin.company.edit')" :current="request()->routeIs('admin.company.edit')" wire:navigate>{{ trans_choice('general.companies', 1) }}</flux:navlist.item>
                 </flux:navlist.group>
-                <flux:navlist.group :heading="trans_choice('thirdparties.thirdparties', 2)" class="grid">
+
+                <flux:navlist.group :heading="__('general.general')" class="grid">
                     <flux:navlist.item icon="building-office-2" :href="route('thirdparties.index')" :current="request()->routeIs('thirdparties.index')" wire:navigate>{{ trans_choice('thirdparties.thirdparties', 2) }}</flux:navlist.item>
-                </flux:navlist.group>
-    
-                <flux:navlist.group :heading="trans_choice('products.products', 2)" class="grid">
                     <flux:navlist.item icon="archive-box" :href="route('products.index')" :current="request()->routeIs('products.index')" wire:navigate>{{ trans_choice('products.products', 2) }}</flux:navlist.item>
                 </flux:navlist.group>
+
                 <flux:navlist.group :heading="trans_choice('sales.sales', 2)" class="grid">
                     <flux:navlist.item icon="document-text" :href="route('sales.budgets.index')" :current="request()->routeIs('sales.budgets.index')" wire:navigate>{{ trans_choice('sales.budgets', 2) }}</flux:navlist.item>
                 </flux:navlist.group>

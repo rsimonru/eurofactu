@@ -12,7 +12,6 @@ use App\Models\Product;
 use App\Models\ProductsVariant;
 use App\Notifications\SendBudget;
 use Illuminate\Support\Facades\Notification;
-use Livewire\Attributes\Reactive;
 
 new class extends Component {
     public ?SalesBudget $budget = null;
@@ -28,7 +27,8 @@ new class extends Component {
     public ?int $line_units = null;
     public $line_base_unit = null;
     public $line_discountp = null;
-    public $line_tax_type = null;
+    public $line_tax_type_id = null;
+
 
     // Budget fields
     public ?int $thirdparty_id = null;
@@ -42,6 +42,7 @@ new class extends Component {
     public ?string $reference = null;
     public ?string $observations = null;
     public ?string $internal_note = null;
+    public float $tax_retention = 0.0;
 
     // Thirdparty data
     public ?string $vat = null;
@@ -115,6 +116,7 @@ new class extends Component {
         $this->country_id = $this->budget->country_id;
         $this->phone = $this->budget->phone;
         $this->email = $this->budget->email;
+        $this->tax_retention = $this->budget->tax_retention ?? 0.0;
     }
 
     /**
@@ -131,6 +133,7 @@ new class extends Component {
                 ['label' => trans_choice('sales.budgets', 2), 'url' => route('sales.budgets.index')],
                 ['label' => $this->isEditing ? $this->budget->number : __('general.new'), 'url' => null],
             ],
+            'products_summary' => $this->budget ? $this->budget->emtGetProductsSummary() : [],
         ];
     }
 
@@ -151,9 +154,6 @@ new class extends Component {
                 vcSelect: 'products_variants',
                 parameter1: $this->line_product_id
             );
-            // if (length($variants) == 1) {
-            //     $this->line_product_variant_id = $variants[0]['value'];
-            // }
             return $variants;
         } else {
             return [];
@@ -167,7 +167,7 @@ new class extends Component {
     #[Computed]
     public function tax_types(): array
     {
-        return Select::emtGet('tax_types');
+        return Select::emtGet('tax_types_ids');
     }
     #[Computed]
     public function states(): array
@@ -196,7 +196,7 @@ new class extends Component {
         if($product_variant) {
             $this->line_description = $product_variant->product->description;
             $this->line_base_unit = $product_variant->price;
-            $this->line_tax_type = $product_variant->product->tax_type->value;
+            $this->line_tax_type_id = $product_variant->product->tax_type_id ?? null;
         }
     }
 
@@ -206,6 +206,7 @@ new class extends Component {
         $pdf->documents = $this->budget;
         $pdf->data = [
             'company' => $this->budget->company,
+            'products_summary' => $this->budget ? $this->budget->emtGetProductsSummary() : [],
         ];
         $data = $pdf->generateFromTemplate('pdf.budget');
 
@@ -225,6 +226,7 @@ new class extends Component {
         $pdf->documents = $this->budget;
         $pdf->data = [
             'company' => $this->budget->company,
+            'products_summary' => $this->budget ? $this->budget->emtGetProductsSummary() : [],
         ];
         $data = $pdf->generateFromTemplate('pdf.budget');
 
@@ -264,7 +266,7 @@ new class extends Component {
         $this->line_units = 1;
         $this->line_base_unit = 0;
         $this->line_discountp = 0;
-        $this->line_tax_type = null;
+        $this->line_tax_type_id = null;
     }
 
     /**
@@ -288,8 +290,7 @@ new class extends Component {
         $this->line_units = $line['units'] ?? 1;
         $this->line_base_unit = $line['base_unit'] ?? 0;
         $this->line_discountp = ($line['discountp'] ?? 0) * 100;
-        $this->line_tax_type = $line['tax_type'] ?? 0;
-        // dd($this->line_tax_type);
+        $this->line_tax_type_id = $line['tax_type_id'] ?? 0;
     }
 
     /**
@@ -308,27 +309,22 @@ new class extends Component {
             'line_units' => 'required|integer|min:0',
             'line_base_unit' => 'required|numeric|min:0',
             'line_discountp' => 'nullable|numeric|min:0|max:100',
-            'line_tax_type' => 'required|numeric|min:0|max:1',
+            'line_tax_type_id' => 'required|numeric|exists:tax_types,id',
         ]);
 
         $this->line_discountp = $this->line_discountp / 100;
 
-        $tax_type = TaxType::dlGet(
-            records_in_page: -1,
-            filters: [
-                'value' => $this->line_tax_type,
-            ],
-        )->first();
+        $tax_type = TaxType::dlGet($this->line_tax_type_id);
 
         // Calculate amounts
         $base_result = $this->line_base_unit * (1 - $this->line_discountp);
         $base_line = $base_result * $this->line_units;
-        $tax_unit = $base_result * $this->line_tax_type;
+        $tax_unit = $base_result * $tax_type->value;
         $tax_line = $tax_unit * $this->line_units;
-        $es_type = $tax_type->es_type ?? 0;
+        $es_type = ($this->budget->thirdparty->equivalence_surcharge ?? 0) ? $tax_type->pes : 0;
         $es_unit = $base_result * $es_type;
         $es_line = $es_unit * $this->line_units;
-        $total_line = $base_line + $tax_line;
+        $total_line = $base_line + $tax_line + $es_line;
 
         $lineData = [
             'sales_budget_id' => $this->budget->id,
@@ -341,7 +337,8 @@ new class extends Component {
             'discounti' => 0,
             'base_result' => $base_result,
             'base_line' => $base_line,
-            'tax_type' => $this->line_tax_type,
+            'tax_type_id' => $tax_type->id ?? null,
+            'tax_type' => $tax_type->value,
             'tax_unit' => $tax_unit,
             'tax_line' => $tax_line,
             'es_type' => $es_type,
@@ -447,7 +444,7 @@ new class extends Component {
 
             <flux:button type="button" size="sm" variant="primary" color="blue" icon="envelope" class="cursor-pointer" x-on:click="$wire.openSendEmail = true">
                 <span class="hidden md:inline">Email</span>
-            </flux:button>  
+            </flux:button>
 
             <flux:button type="button" size="sm" variant="primary" icon="save" class="cursor-pointer" wire:click="save">
                 <span class="hidden md:inline">{{ __('general.save') }}</span>
@@ -525,6 +522,9 @@ new class extends Component {
                                             <flux:table.column align="center">{{ __('sales.price_unit') }}</flux:table.column>
                                             <flux:table.column align="center">{{ __('sales.discount') }}</flux:table.column>
                                             <flux:table.column align="center">{{ __('sales.tax') }}</flux:table.column>
+                                            @if($this->budget->thirdparty->equivalence_surcharge ?? 0)
+                                                <flux:table.column align="center">{{ __('general.re') }}</flux:table.column>
+                                            @endif
                                             <flux:table.column align="center">{{ __('sales.total') }}</flux:table.column>
                                             <flux:table.column class="w-20"></flux:table.column>
                                         </flux:table.columns>
@@ -539,6 +539,9 @@ new class extends Component {
                                                     <flux:table.cell class="text-right">{{ $line['units'] ? number_format($line['base_unit'], 2, ",", ".")."€" : "-" }}</flux:table.cell>
                                                     <flux:table.cell class="text-right">{{ $line['units'] ? number_format($line['discountp']* 100, 2, ",", ".")."%" : "-" }}</flux:table.cell>
                                                     <flux:table.cell class="text-right">{{ $line['units'] ? number_format($line['tax_type'] * 100, 2, ",", ".")."%" : "-" }}</flux:table.cell>
+                                                    @if($this->budget->thirdparty->equivalence_surcharge ?? 0)
+                                                        <flux:table.cell class="text-right">{{ $line['units'] ? number_format($line['es_type'] * 100, 2, ",", ".")."%" : "-" }}</flux:table.cell>
+                                                    @endif
                                                     <flux:table.cell class="text-right font-semibold">{{ $line['units'] ? number_format($line['total_line'], 2, ",", ".")."€" : "-" }}</flux:table.cell>
                                                     <flux:table.cell class="justify-end align-middle">
                                                         <span>
@@ -567,22 +570,30 @@ new class extends Component {
                                     </flux:table>
 
                                     <div class="border-t pt-4">
-                                        <div class="flex justify-end">
-                                            <div class="w-64 space-y-2">
-                                                <div class="flex justify-between text-sm">
-                                                    <span>{{ __('sales.subtotal') }}:</span>
-                                                    <span class="font-semibold">{{ number_format(array_sum(array_column($lines, 'base_line')), 2, ",", ".") }}€</span>
-                                                </div>
-                                                <div class="flex justify-between text-sm">
-                                                    <span>{{ __('sales.taxes') }}:</span>
-                                                    <span class="font-semibold">{{ number_format(array_sum(array_column($lines, 'tax_line')), 2, ",", ".") }}€</span>
-                                                </div>
-                                                <div class="flex justify-between text-lg font-bold border-t pt-2">
-                                                    <span>{{ __('sales.total') }}:</span>
-                                                    <span>{{ number_format(array_sum(array_column($lines, 'total_line')), 2, ",", ".") }}€</span>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <table class="flex justify-end">
+                                            <tr>
+                                                <td colspan="2" class="text-sm pr-4">{{ __('sales.subtotal') }}</td>
+                                                <td class="text-sm font-semibold text-right w-32">{{ number_format($products_summary['base_line'] , 2, ",", ".") }}€</td>
+                                            </tr>
+                                            @foreach($products_summary['tax_summary'] as $tax_values)
+                                                <tr>
+                                                    <td class="text-sm pr-4">{{ $tax_values['tax_name'] }}</td>
+                                                    <td class="text-sm pr-4">{{ $tax_values['es_line'] ? ('+ '. number_format($tax_values['es_rate'] * 100, 2, ",", ".").'% '. __('general.re')) : '' }}</td>
+                                                    <td class="text-sm font-semibold text-right w-32">{{ number_format($tax_values['tax_line'] + $tax_values['es_line'], 2, ",", ".") }}€</td>
+                                                </tr>
+                                            @endforeach
+                                            @if($tax_retention != 0)
+                                                <tr>
+                                                    <td class="text-sm pr-4">{{ __('general.tax_retention') }}</td>
+                                                    <td class="text-sm pr-4">{{ number_format($tax_retention * 100, 2, ",", ".") }}%</td>
+                                                    <td class="text-sm font-semibold text-right w-32"> - {{ number_format($products_summary['base_line'] * $tax_retention, 2, ",", ".") }}€</td>
+                                                </tr>
+                                            @endif
+                                            <tr class="border-t pt-2">
+                                                <td colspan="2" class="text-lg font-bold pr-4">{{ __('sales.total') }}</td>
+                                                <td class="text-sm font-semibold text-right w-32">{{ number_format($products_summary['total_line'] - ($products_summary['base_line'] * $tax_retention), 2, ",", ".") }}€</td>
+                                            </tr>
+                                        </table>
                                     </div>
                                 @else
                                     @if(!$editingLine)
@@ -703,10 +714,10 @@ new class extends Component {
                                 wire:model="line_discountp" size="sm" error="line_discountp" min-value="0" max-value="100"
                                 class:input="text-right" />
 
-                            <flux:select size="sm" wire:model="line_tax_type" variant="listbox"
+                            <flux:select size="sm" wire:model="line_tax_type_id" variant="listbox"
                                 label="{{ __('sales.tax') }} (%)"
                                 placeholder="{{ __('general.select') }}"
-                                error="line_tax_type">
+                                error="line_tax_type_id">
                                 @foreach ($this->tax_types as $tax_types)
                                     <flux:select.option value="{{ $tax_types['value'] }}">{{ $tax_types['option'] }}</flux:select.option>
                                 @endforeach

@@ -29,6 +29,7 @@ return new class extends Migration
             $table->text('legal_info')->nullable();
             $table->json('additional_info')->nullable();
             $table->json('parameters')->nullable();
+            $table->foreignId('tax_id')->constrained('taxes')->nullable();
             $table->integer('fiscal_year');
             $table->smallInteger('fiscal_start_month')->default(1);
             $table->smallInteger('fiscal_end_month')->default(12);

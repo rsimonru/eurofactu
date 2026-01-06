@@ -45,7 +45,7 @@ class Company extends Model
             return $query->where('companies.id', $model_id);
         });
 
-        $oQuery = static::emtApplyFilters($oQuery, $filters);
+        $oQuery = static::applyFilters($oQuery, $filters);
 
         // Order by
         foreach ($sort as $key => $value) {
@@ -55,7 +55,7 @@ class Company extends Model
         $model_id = ($model_id > 0) ? $model_id : ((isset($filters['code']) && !empty($filters['code'])) ? 1:0);
         return static::getModelData($oQuery, $model_id, $records_in_page);
     }
-    public static function emtApplyFilters(
+    public static function applyFilters(
         $oQuery,
         ?array $filters = []
     ) {

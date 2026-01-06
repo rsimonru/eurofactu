@@ -40,7 +40,7 @@ class LocalLog extends Model
         })
         ;
 
-        $query = static::emtApplyFilters($query, $filters);
+        $query = static::applyFilters($query, $filters);
 
         foreach ($sort as $key => $value) {
             $query->orderBy($key, $value);
@@ -49,7 +49,7 @@ class LocalLog extends Model
         return static::getModelData($query, $model_id, $records_in_page, $with);
     }
 
-    private static function emtApplyFilters(
+    private static function applyFilters(
         $query,
         ?array $filters = []
     ) {

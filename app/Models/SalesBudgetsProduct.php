@@ -39,6 +39,7 @@ class SalesBudgetsProduct extends Model
         'discounti',
         'base_result',
         'base_line',
+        'tax_type_id',
         'tax_type',
         'tax_unit',
         'tax_line',
@@ -71,7 +72,7 @@ class SalesBudgetsProduct extends Model
             return $query->where('sales_budgets_products.id', $model_id);
         });
 
-        $oQuery = static::emtApplyFilters($oQuery, $filters);
+        $oQuery = static::applyFilters($oQuery, $filters);
 
         foreach ($sort as $key => $value) {
             $oQuery->orderBy($key, $value);
@@ -80,7 +81,7 @@ class SalesBudgetsProduct extends Model
         return static::getModelData($oQuery, $model_id, $records_in_page, $with);
     }
 
-    public static function emtApplyFilters(
+    public static function applyFilters(
         $oQuery,
         ?array $filters = []
     ) {
@@ -101,6 +102,11 @@ class SalesBudgetsProduct extends Model
     public function sales_budget()
     {
         return $this->belongsTo(SalesBudget::class, 'sales_budget_id');
+    }
+
+    public function taxtype()
+    {
+        return $this->belongsTo(TaxType::class, 'tax_type_id');
     }
 
     public function product_variant()

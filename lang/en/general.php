@@ -12,6 +12,7 @@ return [
     'more_info' => 'More info',
     'companies' => 'Company|Companies',
     'saved_successfully' => 'Saved successfully.',
+    'general' => 'General',
 
     // Common fields/actions
     'name' => 'Name',
@@ -43,9 +44,14 @@ return [
     'state' => 'State',
     'are_you_sure' => 'Are you sure?',
     'confirm_delete' => 'Are you sure you want to delete the selected record? This action cannot be undone.',
-    'selected' => 'selected', 
+    'selected' => 'selected',
     'thirdparties' => 'Thirdparty|Thirdparties',
-
+    'tax_retention' => 'Tax Retention',
+    'vat' => 'VAT',
+    're' => 'RE',
+    'base' => 'Base',
+    'retention' => 'Retention',
+    'total' => 'Total',
 
     // Appearance
     'appearance' => 'Appearance',

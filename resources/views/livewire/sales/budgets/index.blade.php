@@ -162,7 +162,7 @@ new class extends Component {
             <flux:table container:class="h-[calc(100vh-22rem)] md:h-[calc(100vh-15rem)]" :paginate="$this->budgets">
                 <flux:table.columns sticky class="bg-white dark:bg-zinc-900 mx-2">
                     <flux:table.column align="center">
-                        <flux:checkbox.all />
+                        <flux:checkbox.all class="pl-1 md:pl-0" />
                     </flux:table.column>
                     <flux:table.column align="center" sortable :sorted="$sortByField === 'number'" :direction="$sortDirection" wire:click="sortBy('number')">{{ __('sales.number') }}</flux:table.column>
                     <flux:table.column align="center" sortable :sorted="$sortByField === 'date'" :direction="$sortDirection" wire:click="sortBy('date')">{{ __('general.date') }}</flux:table.column>

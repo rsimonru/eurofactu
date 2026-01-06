@@ -42,6 +42,8 @@ new class extends Component {
     public bool $is_customer = false;
     #[Validate('required_if:is_customer,|boolean')]
     public bool $is_supplier = false;
+    #[Validate('nullable|numeric|min:0|max:1')]
+    public float $tax_retention = 0.0;
 
     public function mount(?int $id = null): void
     {
@@ -96,11 +98,15 @@ new class extends Component {
         $this->observations = $thirdparty->observations ?? '';
         $this->is_customer = empty($thirdparty->is_customer) ? false : $thirdparty->is_customer;
         $this->is_supplier = empty($thirdparty->is_supplier) ? false : $thirdparty->is_supplier;
+        $this->tax_retention = $thirdparty->tax_retention * 100;
     }
 
     public function save(): void
     {
+        $this->tax_retention = $this->tax_retention / 100;
         $validated = $this->validate();
+        $this->tax_retention = $this->tax_retention * 100;
+
         if ($this->id) {
             $this->thirdparty->update($validated);
 
@@ -145,14 +151,14 @@ new class extends Component {
             <div class="flex-1 lg:w-1/2">
                 <div class="space-y-6">
                     <!-- Legal Form and VAT -->
-                    <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
-                        <flux:field class="md:col-span-2">
+                    <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
+                        <flux:field class="col-span-2">
                             <flux:label>{{ __('thirdparties.legal_form') }} *</flux:label>
                             <flux:input wire:model="legal_form" placeholder="{{ __('thirdparties.enter_legal_form') }}" />
                             <flux:error name="legal_form" />
                         </flux:field>
 
-                        <flux:field class="md:col-span-2">
+                        <flux:field class="col-span-2">
                             <flux:label>{{ __('thirdparties.contact') }}</flux:label>
                             <flux:input wire:model="contact" placeholder="{{ __('thirdparties.enter_contact') }}" />
                             <flux:error name="contact" />
@@ -163,10 +169,14 @@ new class extends Component {
                             <flux:input wire:model="vat" placeholder="{{ __('thirdparties.enter_vat') }}" />
                             <flux:error name="vat" />
                         </flux:field>
+
+                        <flux:input label="{{ __('general.tax_retention') }} (%)" mask:dynamic="$money($input, ',')"
+                            wire:model="tax_retention" size="sm" error="tax_retention" min-value="0" max-value="100"
+                            class:input="text-right" />
                     </div>
 
                     <!-- Foreign and Contact -->
-                    <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
+                    <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
 
                         <flux:field>
                             <flux:label>{{ __('thirdparties.is_customer') }}</flux:label>
@@ -181,13 +191,13 @@ new class extends Component {
                         </flux:field>
 
                         <!-- Address -->
-                        <flux:field class="md:col-span-2">
+                        <flux:field class="col-span-2">
                             <flux:label>{{ __('thirdparties.address') }}</flux:label>
                             <flux:input wire:model="address" placeholder="{{ __('thirdparties.enter_address') }}" />
                             <flux:error name="address" />
                         </flux:field>
 
-                        <flux:field class="md:col-span-2">
+                        <flux:field class="col-span-2">
                             <flux:label>{{ __('thirdparties.town') }}</flux:label>
                             <flux:input wire:model="town" placeholder="{{ __('thirdparties.enter_town') }}" />
                             <flux:error name="town" />
@@ -195,9 +205,8 @@ new class extends Component {
                     </div>
 
                     <!-- Town, Province, Zip -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-
-                        <flux:field>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        <flux:field class="col-span-2 md:col-span-1">
                             <flux:label>{{ __('thirdparties.province') }}</flux:label>
                             <flux:input wire:model="province" placeholder="{{ __('thirdparties.enter_province') }}" />
                             <flux:error name="province" />
@@ -225,7 +234,7 @@ new class extends Component {
                     </div>
 
                     <!-- Phone and Mobile -->
-                    <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                    <div class="grid grid-cols-2 md:grid-cols-12 gap-4">
                         <flux:field class="md:col-span-2">
                             <flux:label>{{ __('thirdparties.phone') }}</flux:label>
                             <flux:input wire:model="phone" placeholder="{{ __('thirdparties.enter_phone') }}" />
@@ -238,13 +247,13 @@ new class extends Component {
                             <flux:error name="mobile" />
                         </flux:field>
 
-                        <flux:field class="md:col-span-4">
+                        <flux:field class="col-span-2 md:col-span-4">
                             <flux:label>{{ __('thirdparties.email') }}</flux:label>
                             <flux:input type="email" wire:model="email" placeholder="{{ __('thirdparties.enter_email') }}" />
                             <flux:error name="email" />
                         </flux:field>
 
-                        <flux:field class="md:col-span-4">
+                        <flux:field class="col-span-2 md:col-span-4">
                             <flux:label>{{ __('thirdparties.invoice_email') }}</flux:label>
                             <flux:input type="email" wire:model="invoice_email" placeholder="{{ __('thirdparties.enter_invoice_email') }}" />
                             <flux:error name="invoice_email" />

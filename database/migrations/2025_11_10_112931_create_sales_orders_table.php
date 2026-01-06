@@ -20,6 +20,7 @@ return new class extends Migration
             $table->integer('sequential')->nullable();
             $table->string('number', 25);
             $table->date('customer_date')->nullable();
+            $table->decimal('tax_retention', 12, 4)->nullable();
             $table->foreignId('state_id')->constrained('states');
             $table->string('recipient')->nullable();
             $table->string('reference', 100)->nullable();

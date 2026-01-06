@@ -35,7 +35,7 @@ class BanksAccount extends Model
         })
         ;
 
-        $query = static::emtApplyFilters($query, $filters);
+        $query = static::applyFilters($query, $filters);
 
         foreach ($sort as $key => $value) {
             $query->orderBy($key, $value);
@@ -44,7 +44,7 @@ class BanksAccount extends Model
         return static::getModelData($query, $model_id, $records_in_page, $with);
     }
 
-    public static function emtApplyFilters(
+    public static function applyFilters(
         $query,
         ?array $filters = []
     ) {

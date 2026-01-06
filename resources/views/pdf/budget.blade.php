@@ -96,8 +96,8 @@
 
 @section('footer_data')
     @php
-        $retention = $document->retention;
-        $has_es = $document->products->sum('es_line') > 0 ? true : false;
+        $retention = $document->tax_retention * $data['products_summary']['base_line'];
+        $has_es = $data['products_summary']['es_line'] != 0 ? true : false;
         $taxes = $document->products->groupBy('tax_type');
     @endphp
     <htmlpagefooter name="myFooter">
@@ -106,59 +106,59 @@
                 <table class="table-totals table-bordered" style="page-break-inside: avoid ">
                     <thead>
                         <tr>
-                            <th>Base</th>
-                            @if ($document->retention != 0)
-                                <th>Tipo R.</th>
-                                <th>Retención</th>
+                            <th>{{ __('general.base') }}</th>
+                            @if ($document->tax_retention != 0)
+                                <th>% {{ __('general.retention') }}</th>
+                                <th>{{ __('general.retention') }}</th>
                             @endif
 
-                            <th>% IVA</th>
-                            <th>IVA</th>
+                            <th>% {{ __('general.vat') }}</th>
+                            <th>{{ __('general.vat') }}</th>
 
                             @if ($has_es)
-                                <th>% R.E.</th>
-                                <th>R.E.</th>
+                                <th>% {{ __('general.re') }}</th>
+                                <th>{{ __('general.re') }}</th>
                             @endif
 
-                            <th>Total</th>
+                            <th>{{ __('general.total') }}</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($taxes as $type => $tax)
+                        @foreach ($data['products_summary']['tax_summary'] as $tax)
                             <tr>
-                                <td>{{ decimal2string($tax->sum('base_line'), 'euro2') }}</td>
-                                @if ($document->retention != 0)
-                                    <td>{{ decimal2string($document->retention,'percent2') }}</td>
-                                    <td>{{ decimal2string($tax->sum('base_line') * $document->retention, 'euro2') }}</td>
+                                <td>{{ decimal2string($tax['base_line'], 'euro2') }}</td>
+                                @if ($document->tax_retention != 0)
+                                    <td>{{ decimal2string($document->tax_retention,'percent2') }}</td>
+                                    <td>{{ decimal2string($tax['base_line'] * $document->tax_retention, 'euro2') }}</td>
                                 @endif
 
-                                <td>{{ decimal2string($type, 'percent2') }}</td>
-                                <td>{{ decimal2string($tax->sum('tax_line'), 'euro2') }}</td>
+                                <td>{{ decimal2string($tax['tax_rate'] ?? 0, 'percent2') }}</td>
+                                <td>{{ decimal2string($tax['tax_line'], 'euro2') }}</td>
 
                                 @if ($has_es)
-                                    <td>% R.E.</td>
-                                    <td>R.E.</td>
+                                    <td>{{ decimal2string($tax['es_rate'] ?? 0, 'percent2') }}</td>
+                                    <td>{{ decimal2string($tax['es_line'], 'euro2') }}</td>
                                 @endif
 
-                                <td>{{ decimal2string($tax->sum('total_line'), 'euro2') }}</td>
+                                <td>{{ decimal2string($tax['total_line'] - $tax['retention'], 'euro2') }}</td>
                             </tr>
                         @endforeach
                     </tbody>
                     <tfoot>
-                        @if (length($taxes) > 1 )
+                        @if (length($data['products_summary']['tax_summary']) > 1 )
                             <tr>
-                                <th>{{ decimal2string($document->products->sum('base_line'), 'euro2') }}</th>
-                                @if ($document->retention != 0) 
-                                    <th>{{ decimal2string($document->retention, 'percent2') }}</th>
-                                    <th>{{ decimal2string($document->products->sum('base_line') * $document->retention, 'euro2') }}</th>
+                                <th>{{ decimal2string($data['products_summary']['base_line'], 'euro2') }}</th>
+                                @if ($document->tax_retention != 0)
+                                    <th>{{ decimal2string($document->tax_retention, 'percent2') }}</th>
+                                    <th>{{ decimal2string($data['products_summary']['base_line'] * $document->tax_retention, 'euro2') }}</th>
                                 @endif
                                 <th> - </th>
-                                <th>{{ decimal2string($document->products->sum('tax_line'), 'euro2') }}</th>
+                                <th>{{ decimal2string($data['products_summary']['tax_line'], 'euro2') }}</th>
                                 @if ($has_es)
                                     <th> - </th>
-                                    <th>{{ decimal2string($document->products->sum('es_line'), 'euro2') }}</th>
+                                    <th>{{ decimal2string($data['products_summary']['es_line'], 'euro2') }}</th>
                                 @endif
-                                <th>{{ decimal2string($document->products->sum('total_line'), 'euro2') }}</th>
+                                <th>{{ decimal2string($data['products_summary']['total_line'] - $retention, 'euro2') }}</th>
                             </tr>
                         @endif
                     </tfoot>

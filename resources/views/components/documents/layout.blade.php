@@ -42,7 +42,7 @@
                                         wire:click="deleteFilter()"
                                         tooltip="{{ __('general.delete_filter') }}"
                                     >
-                                        {{ __('general.delete_filter') }}            
+                                        {{ __('general.delete_filter') }}
                                     </flux:button>
                                     @foreach ($filter_labels['aValues'] as $key => $filter_label)
                                         @if(length($filter_label['aValues']) > 0)
@@ -60,7 +60,7 @@
                                         <flux:button size="sm" icon:trailing="chevron-down">{{ trans_choice('general.filters', 2) }}</flux:button>
                                         <flux:menu keep-open>
                                             <flux:menu.item icon="trash" wire:click="deleteFilter()">
-                                                {{ __('general.delete_filter') }}            
+                                                {{ __('general.delete_filter') }}
                                             </flux:menu.item>
                                             <flux:menu.separator />
                                             @foreach ($filter_labels['aValues'] as $key => $filter_label)
@@ -109,7 +109,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="flex items-center gap-8">
+                                <div class="flex items-center gap-2 md:gap-8">
                                     <div class="text-right">
                                         <div class="text-xs text-zinc-500 dark:text-zinc-400">{{ __('sales.base') }}</div>
                                         <div class="text-xs md:text-sm font-semibold text-zinc-700 dark:text-zinc-300">
@@ -122,7 +122,7 @@
                                             {{ number_format($this->summary->tax_line ?? 0, 2, ',', '.') }} €
                                         </div>
                                     </div>
-                                    <div class="text-right border-l border-zinc-200 dark:border-zinc-700 pl-8">
+                                    <div class="text-right border-l border-zinc-200 dark:border-zinc-700 pl-4 md:pl-8">
                                         <div class="text-xs text-zinc-500 dark:text-zinc-400">{{ __('sales.total') }}</div>
                                         <div class="text-md md:text-lg font-bold text-zinc-900 dark:text-zinc-100">
                                             {{ number_format($this->summary->total_line ?? 0, 2, ',', '.') }} €

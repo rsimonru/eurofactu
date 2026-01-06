@@ -35,7 +35,7 @@ class SalesInvoicesProduct extends Model
             return $query->where('sales_invoices.id', $model_id);
         });
 
-        $oQuery = static::emtApplyFilters($oQuery, $filters);
+        $oQuery = static::applyFilters($oQuery, $filters);
 
         foreach ($sort as $key => $value) {
             $oQuery->orderBy($key, $value);
@@ -43,7 +43,7 @@ class SalesInvoicesProduct extends Model
         // $oQuery->dd();
         return static::getModelData($oQuery, $model_id, $records_in_page, $with);
     }
-    public static function emtApplyFilters(
+    public static function applyFilters(
         $oQuery,
         ?array $filters = []
     ) {
@@ -65,6 +65,11 @@ class SalesInvoicesProduct extends Model
     public function product_variant()
     {
         return $this->belongsTo(ProductsVariant::class);
+    }
+
+    public function taxtype()
+    {
+        return $this->belongsTo(TaxType::class, 'tax_type_id');
     }
 
     public function createdBy()

@@ -29,7 +29,11 @@ return new class extends Migration
             $table->text('observations')->nullable();
             $table->tinyInteger('is_customer')->nullable();
             $table->tinyInteger('is_supplier')->nullable();
+            $table->decimal('tax_retention', 12, 4)->nullable();
+            $table->tinyInteger('equivalence_surcharge')->default(0);
             $table->timestamps();
+            $table->foreignId('created_by')->nullable()->constrained('users');
+            $table->foreignId('updated_by')->nullable()->constrained('users');
             $table->softDeletes();
         });
     }

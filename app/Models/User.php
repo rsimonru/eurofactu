@@ -102,7 +102,7 @@ class User extends Authenticatable
         })
         ;
 
-        $query = static::emtApplyFilters($query, $filters);
+        $query = static::applyFilters($query, $filters);
 
         foreach ($sort as $key => $value) {
             $query->orderBy($key, $value);
@@ -120,7 +120,7 @@ class User extends Authenticatable
      * @return mixed Query
      *
      */
-    public static function emtApplyFilters(
+    public static function applyFilters(
         $oQuery,
         ?array $filters = []
     ) {

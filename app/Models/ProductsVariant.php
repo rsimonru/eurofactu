@@ -36,7 +36,7 @@ class ProductsVariant extends Model
         })
         ;
 
-        $query = static::emtApplyFilters($query, $filters);
+        $query = static::applyFilters($query, $filters);
 
         foreach ($sort as $key => $value) {
             $query->orderBy($key, $value);
@@ -45,7 +45,7 @@ class ProductsVariant extends Model
         return static::getModelData($query, $model_id, $records_in_page, $with);
     }
 
-    private static function emtApplyFilters(
+    private static function applyFilters(
         $query,
         ?array $filters = []
     ) {

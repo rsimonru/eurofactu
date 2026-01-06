@@ -12,6 +12,7 @@ return [
     'more_info' => 'Más información',
     'companies' => 'Empresa|Empresas',
     'saved_successfully' => 'Guardado correctamente.',
+    'general' => 'General',
 
     // Campos/acciones comunes
     'name' => 'Nombre',
@@ -44,7 +45,13 @@ return [
     'are_you_sure' => '¿Estás seguro?',
     'confirm_delete' => '¿Estás seguro de que quieres eliminar el registro elegido? Esta acción no se puede deshacer.',
     'selected' => 'seleccionados',
-    'thirdparties' => 'Tercero|Terceros',  
+    'thirdparties' => 'Tercero|Terceros',
+    'tax_retention' => 'Retención IRPF',
+    'vat' => 'IVA',
+    're' => 'RE',
+    'base' => 'Base',
+    'retention' => 'Retención',
+    'total' => 'Total',
 
     // Apariencia
     'appearance' => 'Apariencia',

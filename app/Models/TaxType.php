@@ -30,15 +30,19 @@ class TaxType extends Model
         int $model_id=0,
         int $records_in_page = 0,
         array $sort = [],
-        array $filters = []
+        array $filters = [],
+        array $with = []
     ) {
 
         $oQuery = static::select('tax_types.*')
         ->when($model_id>0, function($query) use ($model_id) {
             return $query->where('tax_types.id', $model_id);
         })
-        ->when(isset($filters['tax_type_ids']) && $filters['tax_type_ids']>0, function($query) use ($filters) {
-            return $query->whereIn('tax_types.id', $filters['tax_type_ids']);
+        ->when(isset($filters['tax_type_ids']) && !empty($filters['tax_type_ids']), function($query) use ($filters) {
+            return $query->whereInto('tax_types.id', $filters['tax_type_ids']);
+        })
+        ->when(isset($filters['tax_ids']) && !empty($filters['tax_ids']), function($query) use ($filters) {
+            return $query->whereInto('tax_types.tax_id', $filters['tax_ids']);
         })
         ->when(isset($filters['value']) && $filters['value'] !== null, function($query) use ($filters) {
             return $query->where('tax_types.value', $filters['value']);
@@ -49,6 +53,11 @@ class TaxType extends Model
             $oQuery->orderBy($key, $value);
         }
         //dd($oQuery->toSql());
-        return static::getModelData($oQuery, $model_id, $records_in_page);
+        return static::getModelData($oQuery, $model_id, $records_in_page, $with);
+    }
+
+    public function tax()
+    {
+        return $this->belongsTo(Tax::class);
     }
 }

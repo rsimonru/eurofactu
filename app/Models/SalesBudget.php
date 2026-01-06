@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Traits\WithExtensions;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 
 class SalesBudget extends Model
 {
@@ -70,6 +71,7 @@ class SalesBudget extends Model
                 sales_budget_id,
                 COALESCE(SUM(base_line), 0) as base_line,
                 COALESCE(SUM(tax_line), 0) as tax_line,
+                COALESCE(SUM(es_line), 0) as es_line,
                 COALESCE(SUM(total_line), 0) as total_line
             ')
             ->groupBy('sales_budget_id');
@@ -78,12 +80,12 @@ class SalesBudget extends Model
             ->leftJoinSub($totalsSubquery, 'totals', function($join) {
                 $join->on('totals.sales_budget_id', '=', 'sales_budgets.id');
             })
-            ->addSelect('totals.base_line', 'totals.tax_line', 'totals.total_line')
+            ->addSelect('totals.base_line', 'totals.tax_line', 'totals.es_line', 'totals.total_line')
             ->when($model_id>0, function($query) use ($model_id) {
                 return $query->where('sales_budgets.id', $model_id);
             });
 
-        $oQuery = static::emtApplyFilters($oQuery, $filters);
+        $oQuery = static::applyFilters($oQuery, $filters);
 
         foreach ($sort as $key => $value) {
             // Handle sorting on totals columns
@@ -97,7 +99,7 @@ class SalesBudget extends Model
         return static::getModelData($oQuery, $model_id, $records_in_page, $with, $paginatorName);
     }
 
-    public static function emtApplyFilters(
+    public static function applyFilters(
         $oQuery,
         ?array $filters = []
     ) {
@@ -138,78 +140,67 @@ class SalesBudget extends Model
 
         return $oQuery;
     }
-
-    /**
-     * Get sales summary.
-     *
-     * @param array $filters
-     * @return mixed Collection
-     *
-     */
     public static function emtGetSummary(
-        ?array $filters = []
+        ?array $filters = [],
+        int $records_in_page = 0,
+        array $group_by = []
     ) {
         $oQuery = static::selectRaw('
-            count(distinct sales_budgets.id) as documents,
+            COUNT(distinct sales_budgets.id) as documents,
             COALESCE(SUM(sbp.base_line), 0) as base_line,
             COALESCE(SUM(sbp.tax_line), 0) as tax_line,
+            COALESCE(SUM(sbp.es_line), 0) as es_line,
             COALESCE(SUM(sbp.total_line), 0) as total_line
         ')
-        ->leftJoin('sales_budgets_products as sbp', 'sbp.sales_budget_id', 'sales_budgets.id');
-        $oQuery = static::emtApplyFilters($oQuery, $filters);
+        ->leftJoin('sales_budgets_products as sbp', 'sbp.sales_budget_id', 'sales_budgets.id')
+        ->leftJoin('thirdparties', 'thirdparties.id', 'sales_budgets.thirdparty_id');
 
-        return $oQuery->get()->first();
-    }
+        $oQuery = static::applyFilters($oQuery, $filters);
 
-    public static function emtGetSummaryByCustomers(
-        int $records_in_page = 0,
-        array $sort = [],
-        array $filters = []
-    ) {
-        $oQuery = static::selectRaw('
-            t.id,
-            t.legal_form,
-            sum(sbp.base_line) as base_line,
-            sum(sbp.tax_line) as tax_line,
-            sum(sbp.total_line) as total_line
-        ')
-        ->join('thirdparties as t', 't.id', 'sales_budgets.thirdparty_id')
-        ->leftJoin('sales_budgets_products as sbp', 'sbp.sales_budget_id', 'sales_budgets.id');
-        $oQuery = static::emtApplyFilters($oQuery, $filters);
-
-        foreach ($sort as $key => $value) {
-            $oQuery->orderBy($key, $value);
+        if (!empty($group_by)) {
+            foreach ($group_by as $group) {
+                if ($group == 'thirdparty_id') {
+                    $oQuery->addSelect(DB::raw('sales_budgets.thirdparty_id , thirdparties.legal_form'));
+                }
+                $oQuery->groupBy($group);
+            }
+            return static::getModelData($oQuery, 0, $records_in_page);
+        } else {
+            return $oQuery->get()->first();
         }
-
-        $oQuery->groupBy('sales_budgets.thirdparty_id');
-
-        return static::getModelData($oQuery, 0, $records_in_page);
     }
+    public function emtGetProductsSummary()
+    {
+        $tax_types = TaxType::dlGet(records_in_page: -1, filters: ['tax_id' => $this->tax_id], with: ['tax'])
+            ->keyBy('id');
+        $tax_summary = $this->products->where('units', '<>', 0)->groupBy('tax_type')
+            ->map(function ($items, $key) use ($tax_types) {
+                $base = $items->sum('base_line');
+                $tax = $items->sum('tax_line');
+                $es = $items->sum('es_line');
+                $total = $items->sum('total_line');
+                return [
+                    'tax_name' => ($tax_types[$items->first()->tax_type_id]->tax->description . ' ' . $tax_types[$items->first()->tax_type_id]->type) ?? '',
+                    'tax_rate' => $key,
+                    'base_line' => $base,
+                    'tax_line' => $tax,
+                    'es_rate' => $items->first()->es_type,
+                    'es_line' => $es,
+                    'total_line' => $total,
+                    'retention' => $base * $this->tax_retention,
+                ];
+            })->values()->toArray();
 
-    public static function emtGetSummaryByCompanies(
-        int $records_in_page = 0,
-        array $sort = [],
-        array $filters = []
-    ) {
-        $filters['company_id'] = null;
-        $oQuery = static::selectRaw('
-            c.id,
-            c.legal_form,
-            sum(sbp.base_line) as base_line,
-            sum(sbp.tax_line) as tax_line,
-            sum(sbp.total_line) as total_line
-        ')
-        ->join('companies as c', 'c.id', 'sales_budgets.company_id')
-        ->leftJoin('sales_budgets_products as sbp', 'sbp.sales_budget_id', 'sales_budgets.id');
-        $oQuery = static::emtApplyFilters($oQuery, $filters);
+        $summary = [
+            'tax_summary' => $tax_summary,
+            'base_line' => $this->products->sum('base_line'),
+            'tax_line' => $this->products->sum('tax_line'),
+            'es_line' => $this->products->sum('es_line'),
+            'total_line' => $this->products->sum('total_line'),
+            'retention' => $this->products->sum('base_line') * $this->tax_retention,
+        ];
 
-        foreach ($sort as $key => $value) {
-            $oQuery->orderBy($key, $value);
-        }
-
-        $oQuery->groupBy('sales_budgets.company_id');
-
-        return static::getModelData($oQuery, 0, $records_in_page);
+        return $summary;
     }
 
     public function save(array $options = array(), $do_log = true)
@@ -218,6 +209,7 @@ class SalesBudget extends Model
         $is_dirty_state = $this->isDirty('state_id');
         if ($is_new) {
             $this->company_id = empty($this->company_id) ? session('company')->id ?? 1 : $this->company_id;
+            $this->tax_id = empty($this->tax_id) ? session('company')->tax_id ?? 1 : $this->tax_id;
             $this->fiscal_year = empty($this->fiscal_year) ? session('working_year', today()->format('Y')) : $this->fiscal_year;
 
             $last_budget = SalesBudget::where('fiscal_year', $this->fiscal_year)->where('company_id', $this->company_id)->orderBy('sequential', 'desc')->take(1)->get()->first();
@@ -252,6 +244,11 @@ class SalesBudget extends Model
     public function thirdparty()
     {
         return $this->belongsTo(Thirdparty::class);
+    }
+
+    public function tax()
+    {
+        return $this->belongsTo(Tax::class);
     }
 
     public function state()

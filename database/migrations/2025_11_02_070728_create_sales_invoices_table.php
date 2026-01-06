@@ -23,6 +23,7 @@ return new class extends Migration
             $table->date('paid_date')->nullable();
             $table->foreignId('state_id')->constrained('states');
 
+            $table->decimal('tax_retention', 12, 4)->nullable();
             $table->string('vat', 25);
             $table->string('legal_form', 255)->nullable();
             $table->string('recipient')->nullable();

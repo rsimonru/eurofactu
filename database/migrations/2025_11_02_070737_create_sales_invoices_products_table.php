@@ -32,6 +32,8 @@ return new class extends Migration
             $table->decimal('total_line', 12, 3);
 
             $table->timestamps();
+            $table->foreignId('created_by')->nullable()->constrained('users');
+            $table->foreignId('updated_by')->nullable()->constrained('users');
             $table->softDeletes();
         });
     }

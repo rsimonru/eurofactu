@@ -4,7 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Traits\WithExtensions;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 
 class SalesInvoice extends Model
 {
@@ -13,24 +15,14 @@ class SalesInvoice extends Model
     use SoftDeletes;
 
     protected $casts = [
-        'invoice_date' => 'date',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'invoice_date' => 'date',
         'paid_date' => 'date',
         'sent_date' => 'date',
         'verifactu_data' => 'array',
     ];
 
-    /**
-     * Get invoices
-     *
-     * @param int $iModels_id
-     * @param int $records_in_page
-     * @param array $aSort (attribute => 'asc'/'desc')
-     * @param array $aFilters
-     * @return mixed Collection
-     *
-     */
     public static function emtGet(
         int $model_id=0,
         int $records_in_page = 0,
@@ -47,7 +39,7 @@ class SalesInvoice extends Model
             return $query->where('sales_invoices.id', $model_id);
         });
 
-        $oQuery = static::emtApplyFilters($oQuery, $filters);
+        $oQuery = static::applyFilters($oQuery, $filters);
 
         $oQuery->groupBy('sales_invoices.id');
 
@@ -57,7 +49,7 @@ class SalesInvoice extends Model
         // $oQuery->dd();
         return static::getModelData($oQuery, $model_id, $records_in_page, $with, $paginatorName);
     }
-    public static function emtApplyFilters(
+    public static function applyFilters(
         $oQuery,
         ?array $filters = []
     ) {
@@ -105,7 +97,12 @@ class SalesInvoice extends Model
             return $query->whereNull('sales_invoices.verifactu_data');
         })
         ->when(isset($filters['date']) && !empty($filters['date']), function ($query) use ($filters) {
-            return $query->whereBetween('sales_invoices.' . $filters['date'][0], [$filters['date'][1], $filters['date'][2]]);
+            if (empty($filters['date'][1]) || empty($filters['date'][2])) {
+                return $query;
+            }
+            $from = (new Carbon($filters['date'][1]))->startOfDay();
+            $to = (new Carbon($filters['date'][2]))->endOfDay();
+            return $query->whereBetween('sales_invoices.' . $filters['date'][0], [$from, $to]);
         })
         ->when(isset($filters['search']) && !empty($filters['search']), function($query) use ($filters) {
             return $query->where(function ($query) use ($filters){
@@ -117,111 +114,36 @@ class SalesInvoice extends Model
 
         return $oQuery;
     }
-    /**
-     * Get sales summary.
-     *
-     * @param array $aFilters
-     * @return mixed Colletion
-     *
-     */
     public static function emtGetSummary(
-        ?array $filters = []
+        ?array $filters = [],
+        int $records_in_page = 0,
+        array $group_by = []
     ) {
         $oQuery = static::selectRaw('
-            count(distinct sales_invoices.id) as documents,
-            sum(sip.base_line) as base_line,
-            sum(sip.tax_line) as tax_line,
-            sum(sip.total_line) as total_line,
-            sum(if(sales_invoices.paid_date is not null, sip.total_line,0)) as total_paid
+            COUNT(distinct sales_invoices.id) as documents,
+            COALESCE(SUM(sip.base_line), 0) as base_line,
+            COALESCE(SUM(sip.tax_line), 0) as tax_line,
+            COALESCE(SUM(sip.total_line), 0) as total_line,
+            COALESCE(SUM(if(sales_invoices.paid_date is not null, sip.total_line,0)), 0) as total_paid
         ')
-        ->leftJoin('sales_invoices_products as sip', 'sip.sinvoice_id', 'sales_invoices.id');
-        $oQuery = static::emtApplyFilters($oQuery, $filters);
+        ->leftJoin('sales_invoices_products as sip', 'sip.sinvoice_id', 'sales_invoices.id')
+        ->leftJoin('thirdparties', 'thirdparties.id', 'sales_invoices.thirdparty_id');
+
+        $oQuery = static::applyFilters($oQuery, $filters);
+
+        if (!empty($group_by)) {
+            foreach ($group_by as $group) {
+                if ($group == 'thirdparty_id') {
+                    $oQuery->addSelect(DB::raw('sales_invoices.thirdparty_id , thirdparties.legal_form'));
+                }
+                $oQuery->groupBy($group);
+            }
+            return static::getModelData($oQuery, 0, $records_in_page);
+        } else {
+            return $oQuery->get()->first();
+        }
 
         return $oQuery->get()->first();
-    }
-
-    public static function emtGetSummaryByCustomers(
-        int $records_in_page = 0,
-        array $sort = [],
-        array $filters = []
-    ) {
-        $oQuery = static::selectRaw('
-            t.id,
-            t.legal_form,
-            sum(sip.base_line) as base_line,
-            sum(sip.tax_line) as tax_line,
-            sum(sip.total_line) as total_line,
-            sum(if(sales_invoices.paid_date is not null, sip.total_line,0)) as total_paid
-        ')
-        ->join('thirdparties as t', 't.id', 'sales_invoices.thirdparty_id')
-        ->leftJoin('sales_invoices_products as sip', 'sip.sinvoice_id', 'sales_invoices.id');
-        $oQuery = static::emtApplyFilters($oQuery, $filters);
-
-        foreach ($sort as $key => $value) {
-            $oQuery->orderBy($key, $value);
-        }
-
-        $oQuery->groupBy('sales_invoices.thirdparty_id');
-
-        return static::getModelData($oQuery, 0, $records_in_page);
-    }
-    public static function emtGetSummaryByCompanies(
-        int $records_in_page = 0,
-        array $sort = [],
-        array $filters = []
-    ) {
-        $filters['company_id'] = null;
-        $oQuery = static::selectRaw('
-            c.id,
-            c.legal_form,
-            sum(sip.base_line) as base_line,
-            sum(sip.tax_line) as tax_line,
-            sum(sip.total_line) as total_line,
-            sum(if(sales_invoices.paid_date is not null, sip.total_line,0)) as total_paid,
-            if(o.amount is not null, o.amount, 0) as total_objective
-        ')
-        ->join('companies as c', 'c.id', 'sales_invoices.company_id')
-        ->leftJoin('objectives as o', function($join) {
-            $join->on('o.company_id', 'sales_invoices.company_id')
-                ->whereColumn('o.fiscal_year', 'sales_invoices.fiscal_year');
-        })
-        ->leftJoin('sales_invoices_products as sip', 'sip.sinvoice_id', 'sales_invoices.id');
-        $oQuery = static::emtApplyFilters($oQuery, $filters);
-
-        foreach ($sort as $key => $value) {
-            $oQuery->orderBy($key, $value);
-        }
-
-        $oQuery->groupBy('sales_invoices.company_id');
-
-        return static::getModelData($oQuery, 0, $records_in_page);
-    }
-    public static function emtGetSummaryByYearsCompanies()
-    {
-        $oQuery = static::selectRaw('
-            c.id as company_id,
-            c.legal_form,
-            sales_invoices.fiscal_year,
-            sum(sip.base_line) as base_line,
-            sum(sip.tax_line) as tax_line,
-            sum(sip.total_line) as total_line,
-            sum(if(sales_invoices.paid_date is not null, sip.total_line,0)) as total_paid,
-            if(o.amount is not null, o.amount, 0) as total_objective
-        ')
-        ->join('companies as c', 'c.id', 'sales_invoices.company_id')
-        ->leftJoin('objectives as o', function($join) {
-            $join->on('o.company_id', 'sales_invoices.company_id')
-                ->whereColumn('o.fiscal_year', 'sales_invoices.fiscal_year');
-        })
-        ->leftJoin('sales_invoices_products as sip', 'sip.sinvoice_id', 'sales_invoices.id');
-
-        $oQuery->groupBy('sales_invoices.company_id','sales_invoices.fiscal_year');
-
-        $oQuery->orderBy('sales_invoices.company_id', 'asc');
-        $oQuery->orderBy('sales_invoices.fiscal_year', 'asc');
-
-        return $oQuery->get();
-
     }
 
     public function save(array $options = array(), $do_log = true)

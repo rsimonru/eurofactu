@@ -17,6 +17,7 @@ class Thirdparty extends Model
         'updated_at' => 'datetime',
         'is_customer' => 'boolean',
         'is_supplier' => 'boolean',
+        'equivalence_surcharge' => 'boolean',
     ];
 
     protected $fillable = [
@@ -25,6 +26,8 @@ class Thirdparty extends Model
         'vat',
         'is_customer',
         'is_supplier',
+        'tax_retention',
+        'equivalence_surcharge',
         'address',
         'town',
         'province',
@@ -60,7 +63,7 @@ class Thirdparty extends Model
             return $query->where('thirdparties.id', $model_id);
         });
 
-        $oQuery = static::emtApplyFilters($oQuery, $filters);
+        $oQuery = static::applyFilters($oQuery, $filters);
 
         foreach ($sort as $key => $value) {
             $oQuery->orderBy($key, $value);
@@ -68,7 +71,7 @@ class Thirdparty extends Model
         // $oQuery->dd();
         return static::getModelData($oQuery, $model_id, $records_in_page, $with);
     }
-    public static function emtApplyFilters(
+    public static function applyFilters(
         $oQuery,
         ?array $filters = []
     ) {
