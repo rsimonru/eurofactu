@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('sales_orders_products', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('sales_orders_id')->constrained('sales_orders');
+            $table->foreignId('sales_order_id')->constrained('sales_orders');
             $table->foreignId('product_variant_id')->nullable()->constrained('products_variants');
             $table->text('description')->nullable();
             $table->integer('units');
@@ -23,6 +23,7 @@ return new class extends Migration
             $table->decimal('base_unit', 12, 3);
             $table->decimal('base_result', 12, 3);
             $table->decimal('base_line', 12, 3);
+            $table->foreignId('tax_type_id')->constrained('tax_types');
             $table->decimal('tax_type', 12, 4);
             $table->decimal('tax_unit', 12, 3);
             $table->decimal('tax_line', 12, 3);

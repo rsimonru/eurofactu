@@ -4,5 +4,18 @@
 			"path": "."
 		}
 	],
-	"settings": {}
+    "settings": {
+        "workbench.colorCustomizations": {
+            // Colores barra titulo
+			"titleBar.activeBackground": "#0805db",
+			"titleBar.activeForeground":"#c6dadb",
+			 // Colores de la barra de iconos
+ 			"activityBar.background": "#0805db",
+			"activityBar.foreground":"#c6dadb",
+
+			// Colores de la barra de estado
+			"statusBar.background": "#0805db",
+			"statusBar.foreground": "#c6dadb",
+        }
+    }
 }

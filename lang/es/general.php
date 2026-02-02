@@ -49,9 +49,15 @@ return [
     'tax_retention' => 'Retención IRPF',
     'vat' => 'IVA',
     're' => 'RE',
+    'price' => 'Precio',
+    'net_price' => 'Precio neto',
+    'net' => 'Neto',
     'base' => 'Base',
     'retention' => 'Retención',
     'total' => 'Total',
+    'net_total' => 'Total neto',
+    'subtotal' => 'Subtotal',
+    'code' => 'Código',
 
     // Apariencia
     'appearance' => 'Apariencia',

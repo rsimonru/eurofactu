@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('sales_notes_products', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('sales_orders_id')->constrained('sales_orders');
-            $table->foreignId('product_variant_id')->nullable()->constrained('products_variants');
+            $table->foreignId('sales_note_id')->constrained('sales_notes');
+            $table->foreignId('sales_orders_product_id')->nullable()->constrained('sales_orders_products');
             $table->text('description')->nullable();
             $table->integer('units');
             $table->integer('confirmed_units');

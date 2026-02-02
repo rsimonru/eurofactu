@@ -88,7 +88,7 @@ class Select extends Model
                 break;
             case "fiscal_years":
                 $year = date("Y")+1;
-                for ($i = $year; $i >= 2012; $i--) {
+                for ($i = $year; $i >= 2024; $i--) {
                     $oSelect[] = ["value" => $i, "option" => $i];
                 }
                 break;
@@ -172,7 +172,7 @@ class Select extends Model
                         $query->where('thirdparties.legal_form', 'like', '%'.$search.'%');
                     })
                     ->when($selected, function ($query) use ($selected) {
-                        $query->where('thirdparties.id', '>', 0)->orWhereIn('thirdparties.id', $selected);
+                        $query->where('thirdparties.id', '>', 0)->orWhereInto('thirdparties.id', $selected);
                     })
                     ->orderBy('thirdparties.legal_form', 'asc')->get()
                     ->toArray();
@@ -199,7 +199,7 @@ class Select extends Model
             case "years":
                 $iYear = date("Y");
                 $iPre = $iYear - (($parameter1 != '') ? $parameter1 : 5);
-                $iPos = $iYear + (($parameter2 != '') ? $parameter2 : 5);
+                $iPos = $iYear + (($parameter2 != '') ? $parameter2 : 1);
 
                 for ($i = $iPre; $i <= $iPos; $i++) {
                     $oSelect[] = ["value" => $i, "option" => $i];

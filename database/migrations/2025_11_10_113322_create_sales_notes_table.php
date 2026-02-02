@@ -21,6 +21,7 @@ return new class extends Migration
             $table->integer('sequential')->nullable();
             $table->string('number', 25);
             $table->date('customer_date')->nullable();
+            $table->dateTime('delivery_date')->nullable();
             $table->foreignId('state_id')->constrained('states');
             $table->string('recipient')->nullable();
             $table->string('reference', 100)->nullable();

@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\CompanyScope;
+use App\Models\Scopes\FiscalYearScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Traits\WithExtensions;
 use Carbon\Carbon;
@@ -18,10 +20,42 @@ class SalesInvoice extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'invoice_date' => 'date',
+        'expiration_date' => 'date',
         'paid_date' => 'date',
         'sent_date' => 'date',
         'verifactu_data' => 'array',
     ];
+
+    protected $fillable = [
+        'thirdparty_id',
+        'company_id',
+        'fiscal_year',
+        'sequential',
+        'number',
+        'invoice_date',
+        'state_id',
+        'tax_id',
+        'vat',
+        'legal_form',
+        'recipient',
+        'reference',
+        'address',
+        'zip',
+        'town',
+        'province',
+        'country_id',
+        'phone',
+        'email',
+        'observations',
+        'internal_note',
+        'tax_retention',
+    ];
+
+    protected static function booted()
+    {
+        static::addGlobalScope(new CompanyScope);
+        static::addGlobalScope(new FiscalYearScope);
+    }
 
     public static function emtGet(
         int $model_id=0,
@@ -146,12 +180,47 @@ class SalesInvoice extends Model
         return $oQuery->get()->first();
     }
 
+    public function emtGetProductsSummary()
+    {
+        $tax_types = TaxType::emtGet(records_in_page: -1, filters: ['tax_id' => $this->tax_id], with: ['tax'])
+            ->keyBy('id');
+        $tax_summary = $this->sales_invoices_products->where('units', '<>', 0)->groupBy('tax_type')
+            ->map(function ($items, $key) use ($tax_types) {
+                $base = $items->sum('base_line');
+                $tax = $items->sum('tax_line');
+                $es = $items->sum('es_line');
+                $total = $items->sum('total_line');
+                return [
+                    'tax_name' => ($tax_types[$items->first()->tax_type_id]->tax->description . ' ' . $tax_types[$items->first()->tax_type_id]->type) ?? '',
+                    'tax_rate' => $key,
+                    'base_line' => $base,
+                    'tax_line' => $tax,
+                    'es_rate' => $items->first()->es_type,
+                    'es_line' => $es,
+                    'total_line' => $total,
+                    'retention' => $base * $this->tax_retention,
+                ];
+            })->values()->toArray();
+
+        $summary = [
+            'tax_summary' => $tax_summary,
+            'base_line' => $this->sales_invoices_products->sum('base_line'),
+            'tax_line' => $this->sales_invoices_products->sum('tax_line'),
+            'es_line' => $this->sales_invoices_products->sum('es_line'),
+            'total_line' => $this->sales_invoices_products->sum('total_line'),
+            'retention' => $this->sales_invoices_products->sum('base_line') * $this->tax_retention,
+        ];
+
+        return $summary;
+    }
+
     public function save(array $options = array(), $do_log = true)
     {
         $is_new = empty($this->id) ? true : false;
         if ($is_new){
             $current_year = date("Y");
             $this->company_id = empty($this->company_id) ? session('company')->id : $this->company_id;
+            $this->tax_id = empty($this->tax_id) ? session('company')->tax_id ?? 1 : $this->tax_id;
             $this->fiscal_year = empty($this->fiscal_year) ? session('working_year') : $this->fiscal_year;
 
             $last_invoice = static::where('fiscal_year', $this->fiscal_year)->where('company_id', $this->company_id)->orderBy('sequential', 'desc')->take(1)->get()->first();
@@ -170,7 +239,7 @@ class SalesInvoice extends Model
             }
             $sequential = ($last_invoice) ? $last_invoice->sequential + 1 : 1;
             $this->sequential = $sequential;
-            $this->number = $this->fiscal_year.'-'.sprintf('%04d', $sequential);
+            $this->number = 'FV' . ($this->fiscal_year % 100) . '-' . sprintf('%04d', $sequential);
 
         }
         parent::save($options, $do_log);
@@ -192,6 +261,9 @@ class SalesInvoice extends Model
     }
     public function thirdparty() {
         return $this->hasOne(Thirdparty::class, 'id', 'thirdparty_id');
+    }
+    public function tax() {
+        return $this->belongsTo(Tax::class);
     }
     public function banks_account() {
         return $this->hasOne(BanksAccount::class, 'id', 'bank_account_id');

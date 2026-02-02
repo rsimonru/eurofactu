@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('company_id')->constrained('companies');
             $table->foreignId('thirdparty_id')->constrained('thirdparties');
+            $table->foreignId('tax_id')->nullable()->constrained('taxes');
             $table->integer('fiscal_year');
             $table->integer('sequential')->nullable();
             $table->string('number', 25);

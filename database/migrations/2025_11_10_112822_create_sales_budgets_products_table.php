@@ -23,6 +23,7 @@ return new class extends Migration
             $table->decimal('base_unit', 12, 3);
             $table->decimal('base_result', 12, 3);
             $table->decimal('base_line', 12, 3);
+            $table->foreignId('tax_type_id')->constrained('tax_types');
             $table->decimal('tax_type', 12, 4);
             $table->decimal('tax_unit', 12, 3);
             $table->decimal('tax_line', 12, 3);

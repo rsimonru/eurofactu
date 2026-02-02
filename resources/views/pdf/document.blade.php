@@ -10,7 +10,7 @@
 
 <style>
     body {
-        font-size: 12px;
+        font-size: 14px;
         font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     }
 
@@ -26,12 +26,16 @@
         width: 100%;
     }
 
+    .table-bordered {
+        border: 1px solid #000;
+    }
+
     .table-data thead tr th {
-        font-size: 9px;
+        font-size: 12px;
     }
 
     .table-data tbody tr td {
-        font-size: 9px;
+        font-size: 11px;
     }
 
     .table-totals thead tr {
@@ -40,6 +44,7 @@
     }
 
     .table-totals thead tr th {
+        border-bottom: 1px solid #000;
         padding-top: 3px;
         padding-bottom: 3px;
         text-align: center;
@@ -140,40 +145,58 @@
         float: left;
     }
 
+    .barcode {
+        text-align: center;
+    }
+
+    /* Estilo para el texto del código QR */
+    .qr-text {
+        font-size: 10px;
+        text-align: center;
+        margin-top: 5px;
+        font-weight: bold;
+    }
+
 </style>
 
 <body>
     <div class="container" style="padding-left: 10px;padding-right: 0">
-        <div class="row" style="padding-left: 0;margin-left: 0;margin-right:20px;">
-            <div class="col-xs-12 text-right">
-                <div style="text-align: right; border-bottom: 1px solid #1e0999ff;">
-                    <img src="{{ storage_path('app/private/'.$data['company']->logo) }}" width="180"
-                         alt="logo_company" />
-                </div>
-            </div>
-        </div>
-        <div class="row" style="padding-left: 0;margin-left: 0">
-            <div class="col-xs-10" style="padding-left: 0;margin-left: 0">
-                <h4 style="margin-bottom: 1px;font-size: 18px;">
-                    <strong>@yield('document_type')</strong> -@yield('document_number')
-                </h4>
-                @yield('document_data')
-                <br>
-                <div style="background-color: #1e0999ff;height: 7px;width: 150px;  margin-bottom:15px"></div>
-            </div>
-        </div>
-        <div class="row" style="padding-left: 0;margin-left: 0">
-            <div class="col-print-6" style="padding-left: 0;margin-left: 0">
-                @yield('economics')
-            </div>
-            <div class="col-print-3">
-                @yield('thirdparty_data')
-            </div>
-        </div>
-        <div class="row" style="padding-left: 0;margin-top: 5px">
-            <div class="col-xs-12">
-                <br>
-                <br>
+        <htmlpageheader name="myHeader">
+            <!-- <table style="width:100%; border-bottom: 1px solid #000; padding-bottom:10px; margin-bottom:10px"> -->
+            <table style="width:100%; padding-bottom:10px; margin-bottom:10px">
+                <tr>
+                    <td style="text-align: left;font-size: 18px">
+                        <strong>@yield('document_type'): @yield('document_number')</strong>
+                    </td>
+                    <td style="text-align: right;">
+                        <img src="{{ storage_path('app/private/'.$data['company']->logo) }}" width="180"
+                            alt="logo_company" />
+                    </td>
+                </tr>
+            </table>
+        </htmlpageheader>
+        <sethtmlpageheader name="myHeader" value="on" show-this-page="1"/>
+
+        <table style="width:100%; padding-bottom:10px; margin-bottom:10px">
+            <tr>
+                <td width="35%" style="text-align: left; padding-top:40px; vertical-align: top;">
+                    @yield('document_data')
+                    <br>
+                    @yield('economics')
+                </td>
+                @if(!empty(trim($__env->yieldContent('verifactu_data'))))
+                <td width="32%" style="text-align: center;">
+                    @yield('verifactu_data')
+                </td>
+                @endif
+                <td width="33%" style="text-align: left; padding-top:40px; vertical-align: top;">
+                    @yield('thirdparty_data')
+                </td>
+            </tr>
+        </table>
+
+        <div class="row" style="padding-left: 0;margin-top: 25px">
+            <div>
                 <h5>@yield('detail_of_document')</h5>
                 @yield('table_data')
             </div>

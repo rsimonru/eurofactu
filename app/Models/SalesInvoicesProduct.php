@@ -12,6 +12,27 @@ class SalesInvoicesProduct extends Model
     use WithExtensions;
     use SoftDeletes;
 
+    protected $fillable = [
+        'sinvoice_id',
+        'product_variant_id',
+        'description',
+        'units',
+        'base_unit',
+        'discount_type',
+        'discountp',
+        'discounti',
+        'base_result',
+        'base_line',
+        'tax_type_id',
+        'tax_type',
+        'tax_unit',
+        'tax_line',
+        'es_type',
+        'es_unit',
+        'es_line',
+        'total_line',
+    ];
+
     /**
      * Get invoices
      *

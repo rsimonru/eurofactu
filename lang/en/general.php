@@ -49,9 +49,15 @@ return [
     'tax_retention' => 'Tax Retention',
     'vat' => 'VAT',
     're' => 'RE',
+    'price' => 'Price',
+    'net_price' => 'Net Price',
+    'net' => 'Net',
     'base' => 'Base',
     'retention' => 'Retention',
     'total' => 'Total',
+    'net_total' => 'Net Total',
+    'subtotal' => 'Subtotal',
+    'code' => 'Código',
 
     // Appearance
     'appearance' => 'Appearance',

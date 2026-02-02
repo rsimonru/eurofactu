@@ -14,6 +14,7 @@ class UserSession
         $company = Company::emtGet($company_id);
         session(['company_id' => $company_id]);
         session(['company' => $company]);
+        session(['fiscal_year' => today()->format('Y')]);
         if ($update_login) {
             $bd_user->last_login = now();
             $bd_user->save();

@@ -33,6 +33,7 @@ return [
     'customer' => 'Cliente',
     'supplier' => 'Proveedor',
     'type' => 'Tipo',
+    'equivalence_surcharge' => 'Recargo de equivalencia',
 
     // Placeholders
     'enter_legal_form' => 'Introducir razón social',

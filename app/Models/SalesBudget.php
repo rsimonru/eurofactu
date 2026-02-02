@@ -7,6 +7,8 @@ use App\Traits\WithExtensions;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
+use App\Models\Scopes\CompanyScope;
+use App\Models\Scopes\FiscalYearScope;
 
 class SalesBudget extends Model
 {
@@ -46,6 +48,12 @@ class SalesBudget extends Model
         'observations',
         'internal_note',
     ];
+
+    protected static function booted()
+    {
+        static::addGlobalScope(new CompanyScope);
+        static::addGlobalScope(new FiscalYearScope);
+    }
 
     /**
      * Get budgets
@@ -171,7 +179,7 @@ class SalesBudget extends Model
     }
     public function emtGetProductsSummary()
     {
-        $tax_types = TaxType::dlGet(records_in_page: -1, filters: ['tax_id' => $this->tax_id], with: ['tax'])
+        $tax_types = TaxType::emtGet(records_in_page: -1, filters: ['tax_id' => $this->tax_id], with: ['tax'])
             ->keyBy('id');
         $tax_summary = $this->products->where('units', '<>', 0)->groupBy('tax_type')
             ->map(function ($items, $key) use ($tax_types) {
@@ -218,13 +226,66 @@ class SalesBudget extends Model
             }
             $sequential = ($last_budget) ? $last_budget->sequential + 1 : 1;
             $this->sequential = $sequential;
-            $this->number = 'PR' . $this->fiscal_year.'-'.sprintf('%04d', $sequential);
-
+            $this->number = 'PR' . ($this->fiscal_year % 100) . '-' . sprintf('%04d', $sequential);
         }
         if ($is_dirty_state && $this->state_id === config('constants.states.sent') && $this->sent_date === null) {
             $this->sent_date = now();
         }
         parent::save($options, $do_log);
+    }
+
+    public function createOrder($lines_units, $customer_date = null)
+    {
+        $thirdparty = $this->thirdparty;
+        $order = new SalesOrder();
+        $order->company_id = $this->company_id;
+        $order->thirdparty_id = $this->thirdparty_id;
+        $order->sales_budget_id = $this->id;
+        $order->customer_date = $customer_date ? $customer_date : today();
+        $order->state_id = config('constants.states.open');
+        $order->tax_retention = $this->tax_retention;
+        $order->vat = ($this->vat) ? $this->vat : $thirdparty->vat;
+        $order->legal_form = ($this->legal_form) ? $this->legal_form : $thirdparty->legal_form;
+        $order->recipient = ($this->recipient) ? $this->recipient : $thirdparty->contact;
+        $order->reference = $this->reference;
+        $order->address = ($this->address) ? $this->address : $thirdparty->address;
+        $order->zip = ($this->zip) ? $this->zip : $thirdparty->zip;
+        $order->town = ($this->town) ? $this->town : $thirdparty->town;
+        $order->province = ($this->province) ? $this->province : $thirdparty->province;
+        $order->country_id = ($this->country_id) ? $this->country_id : $thirdparty->country_id;
+        $order->phone = ($this->phone) ? $this->phone : $thirdparty->phone;
+        $order->email = ($this->email) ? $this->email : $thirdparty->email;
+        $order->observations = $this->observations;
+        $order->internal_note = $this->internal_note;
+        $order->save();
+
+        foreach ($this->products as $budget_product) {
+            if (isset($lines_units[$budget_product->id])) {
+                $units = $lines_units[$budget_product->id];
+                $order_product = new SalesOrdersProduct();
+                $order_product->sales_order_id = $order->id;
+                $order_product->product_variant_id = $budget_product->product_variant_id;
+                $order_product->description = $budget_product->description;
+                $order_product->units = $lines_units[$budget_product->id] ?? 0;
+                $order_product->base_unit = $budget_product->base_unit;
+                $order_product->discount_type = $budget_product->discount_type;
+                $order_product->discountp = $budget_product->discountp;
+                $order_product->discounti = $budget_product->discounti;
+                $order_product->base_result = $budget_product->base_result;
+                $order_product->tax_type_id = $budget_product->tax_type_id;
+                $order_product->tax_type = $budget_product->tax_type;
+                $order_product->tax_unit = $budget_product->tax_unit;
+                $order_product->tax_line = $budget_product->tax_unit * $units;
+                $order_product->es_type = $budget_product->es_type;
+                $order_product->es_unit = $budget_product->es_unit;
+                $order_product->es_line = $budget_product->es_unit * $units;
+                $order_product->base_line = $budget_product->base_unit * $units;
+                $order_product->total_line = $order_product->base_line + $order_product->tax_line + $order_product->es_line;
+                $order_product->save();
+            }
+        }
+
+        return $order;
     }
 
     public function delete($do_log = true)

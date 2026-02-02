@@ -25,6 +25,9 @@ class StatesModelsTableSeeder extends Seeder
             ["id" => 8, "created_at" => now(), "updated_at" => now(), 'states_id' => 8, 'model' => 'App\Models\SalesBudget', 'order' => 2, ],
             ["id" => 9, "created_at" => now(), "updated_at" => now(), 'states_id' => 9, 'model' => 'App\Models\SalesBudget', 'order' => 3, ],
 
+            ["id" => 10, "created_at" => now(), "updated_at" => now(), 'states_id' => 2, 'model' => 'App\Models\SalesOrder', 'order' => 1, ],
+            ["id" => 11, "created_at" => now(), "updated_at" => now(), 'states_id' => 8, 'model' => 'App\Models\SalesOrder', 'order' => 2, ],
+            ["id" => 12, "created_at" => now(), "updated_at" => now(), 'states_id' => 9, 'model' => 'App\Models\SalesOrder', 'order' => 3, ],
         ];
 
         StatesModel::upsert($records, ['id'], ['states_id', 'model', 'order', 'created_at', 'updated_at']);

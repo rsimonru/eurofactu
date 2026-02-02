@@ -33,6 +33,7 @@ return [
     'customer' => 'Customer',
     'supplier' => 'Supplier',
     'type' => 'Type',
+    'equivalence_surcharge' => 'Equivalence Surcharge',
 
     // Placeholders
     'enter_legal_form' => 'Enter legal form',

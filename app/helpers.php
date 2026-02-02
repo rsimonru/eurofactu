@@ -136,7 +136,9 @@ if (!function_exists('string2decimal')) {
 }
 if (!function_exists('decimal2string')) {
     function decimal2string($value, $format = 'number2') {
-		if ($format == 'number2') {
+        if ($format == 'number0') {
+			return number_format($value, 0, ',', '.');
+		} elseif ($format == 'number2') {
 			return number_format($value, 2, ',', '.');
 		} elseif ($format == 'euro2') {
 			return number_format($value, 2, ',', '.') . ' €';

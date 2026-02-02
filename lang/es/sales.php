@@ -17,8 +17,46 @@
         'budget_lines_placeholder' => 'Las líneas de presupuesto estarán disponibles después de crear el presupuesto',
         'select_budgets' => 'Seleccione al menos un presupuesto',
         'detail_of_budget' => 'Detalle del presupuesto',
+
+        // Orders
+        'create_order' => 'Crear Pedido',
+        'edit_order' => 'Editar Pedido',
+        'search_orders' => 'Buscar pedidos',
+        'filter_orders' => 'Filtrar pedidos',
+        'order_created' => 'Pedido creado correctamente',
+        'order_updated' => 'Pedido actualizado correctamente',
+        'order_deleted' => 'Pedido eliminado correctamente',
+        'order_lines_placeholder' => 'Las líneas del pedido estarán disponibles después de crear el pedido',
+        'select_orders' => 'Seleccione al menos un pedido',
+        'save_order_first' => 'Debe guardar el pedido antes de añadir líneas',
+        'send_order' => 'Enviar pedido',
         'detail_of_order' => 'Detalle del pedido',
+
+        // Notes
+        'create_note' => 'Crear Albarán',
+        'edit_note' => 'Editar Albarán',
+        'search_notes' => 'Buscar albaranes',
+        'filter_notes' => 'Filtrar albaranes',
+        'note_created' => 'Albarán creado correctamente',
+        'note_updated' => 'Albarán actualizado correctamente',
+        'note_deleted' => 'Albarán eliminado correctamente',
+        'note_lines_placeholder' => 'Las líneas del albarán estarán disponibles después de crear el albarán',
         'detail_of_note' => 'Detalle del albarán',
+
+        // Invoices
+        'create_invoice' => 'Crear Factura',
+        'edit_invoice' => 'Editar Factura',
+        'search_invoices' => 'Buscar facturas',
+        'filter_invoices' => 'Filtrar facturas',
+        'invoice_created' => 'Factura creada correctamente',
+        'invoice_updated' => 'Factura actualizada correctamente',
+        'invoice_deleted' => 'Factura eliminada correctamente',
+        'invoice_lines_placeholder' => 'Las líneas de la factura estarán disponibles después de crear la factura',
+        'select_invoices' => 'Seleccione al menos una factura',
+        'save_invoice_first' => 'Debe guardar la factura antes de añadir líneas',
+        'send_invoice' => 'Enviar factura',
+        'invoice_date' => 'Fecha factura',
+        'expiration_date' => 'Fecha vencimiento',
         'detail_of_invoice' => 'Detalle de la factura',
 
         // Fields
@@ -27,6 +65,7 @@
         'customer' => 'Cliente',
         'company' => 'Empresa',
         'total' => 'Total',
+        'net_total' => 'Total Neto',
         'base' => 'Base',
         'recipient' => 'Destinatario',
         'reference' => 'Referencia',
@@ -42,13 +81,15 @@
         'province' => 'Provincia',
         'phone' => 'Teléfono',
         'lines' => 'Líneas',
-        'customer_data' => 'Datos del Cliente',
+        'customer_data' => 'Datos del cliente',
+        'customer_date' => 'Fecha cliente',
 
         // Line fields
         'description' => 'Descripción',
         'units' => 'Unidades',
+        'short_units' => 'Uds.',
         'price_unit' => 'Precio/Ud',
-        'discount' => 'Dto',
+        'discount' => 'Dto.',
         'tax' => 'IVA',
         'subtotal' => 'Subtotal',
         'taxes' => 'Impuestos',
@@ -68,4 +109,10 @@
         'enter_internal_note' => 'Introducir nota interna',
 
         'send_budget' => 'Enviar presupuesto',
+
+        'economic_conditions' => 'Condiciones económicas',
+        'payment_method' => 'Forma de pago',
+        'verifiable_invoice_at_aeat' => 'Factura verificable en la sede electrónica de la AEAT',
+        'qr_tax' => 'QR tributario',
+
     ];

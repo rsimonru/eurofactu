@@ -17,8 +17,46 @@
         'budget_lines_placeholder' => 'Budget lines will be available after creating the budget',
         'select_budgets' => 'Select at least one budget',
         'detail_of_budget' => 'Detail of budget',
+
+        // Orders
+        'create_order' => 'Create Order',
+        'edit_order' => 'Edit Order',
+        'search_orders' => 'Search orders',
+        'filter_orders' => 'Filter orders',
+        'order_created' => 'Order created successfully',
+        'order_updated' => 'Order updated successfully',
+        'order_deleted' => 'Order deleted successfully',
+        'order_lines_placeholder' => 'Order lines will be available after creating the order',
+        'select_orders' => 'Select at least one order',
+        'save_order_first' => 'You must save the order before adding lines',
+        'send_order' => 'Send order',
         'detail_of_order' => 'Detail of order',
-        'detail_of_note' => 'Detail of note',
+
+        // Notes
+        'create_note' => 'Create Delivery Note',
+        'edit_note' => 'Edit Delivery Note',
+        'search_notes' => 'Search delivery notes',
+        'filter_notes' => 'Filter delivery notes',
+        'note_created' => 'Delivery note created successfully',
+        'note_updated' => 'Delivery note updated successfully',
+        'note_deleted' => 'Delivery note deleted successfully',
+        'note_lines_placeholder' => 'Delivery note lines will be available after creating the delivery note',
+        'detail_of_note' => 'Detail of delivery note',
+
+        // Invoices
+        'create_invoice' => 'Create Invoice',
+        'edit_invoice' => 'Edit Invoice',
+        'search_invoices' => 'Search invoices',
+        'filter_invoices' => 'Filter invoices',
+        'invoice_created' => 'Invoice created successfully',
+        'invoice_updated' => 'Invoice updated successfully',
+        'invoice_deleted' => 'Invoice deleted successfully',
+        'invoice_lines_placeholder' => 'Invoice lines will be available after creating the invoice',
+        'select_invoices' => 'Select at least one invoice',
+        'save_invoice_first' => 'You must save the invoice before adding lines',
+        'send_invoice' => 'Send invoice',
+        'invoice_date' => 'Invoice date',
+        'expiration_date' => 'Expiration date',
         'detail_of_invoice' => 'Detail of invoice',
 
         // Fields
@@ -27,6 +65,7 @@
         'customer' => 'Customer',
         'company' => 'Company',
         'total' => 'Total',
+        'net_total' => 'Net Total',
         'base' => 'Base',
         'recipient' => 'Recipient',
         'reference' => 'Reference',
@@ -42,13 +81,15 @@
         'province' => 'Province',
         'phone' => 'Phone',
         'lines' => 'Lines',
-        'customer_data' => 'Customer Data',
+        'customer_data' => 'Customer data',
+        'customer_date' => 'Customer date',
 
         // Line fields
         'description' => 'Description',
         'units' => 'Units',
+        'short_units' => 'Units',
         'price_unit' => 'Price/Unit',
-        'discount' => 'Disc',
+        'discount' => 'Disc.',
         'tax' => 'VAT',
         'subtotal' => 'Subtotal',
         'taxes' => 'Taxes',
@@ -68,4 +109,9 @@
         'enter_internal_note' => 'Enter internal note',
 
         'send_budget' => 'Send budget',
+
+        'economic_conditions' => 'Economic Conditions',
+        'payment_method' => 'Payment Method',
+        'verifiable_invoice_at_aeat' => 'Verifiable invoice at the AEAT electronic headquarters',
+        'qr_tax' => 'Tax QR',
     ];

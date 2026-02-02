@@ -26,7 +26,7 @@ class Tax extends Model
      * @return mixed Collection
      *
      */
-    public static function dlGet(
+    public static function emtGet(
         int $model_id=0,
         int $records_in_page = 0,
         array $sort = [],
