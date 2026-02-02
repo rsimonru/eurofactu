@@ -20,7 +20,7 @@ Route::middleware(['auth'])->group(function () {
     Route::livewire('admin/users/{id}/edit', 'pages::admin.users.user')->name('admin.users.edit');
 
     // Admin Company
-    Route::livewire('admin/company-edit', 'admin.companies.company')->name('admin.company.edit');
+    Route::livewire('admin/company-edit', 'pages::admin.companies.company')->name('admin.company.edit');
 
     // Thirdparties
     Route::livewire('thirdparties', 'pages::thirdparties.index')->name('thirdparties.index');
