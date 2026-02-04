@@ -483,11 +483,11 @@ new class extends Component {
                             </flux:select>
                         </flux:field>
 
-                        <flux:date-picker label="{{ __('general.date') }}" size="sm"
-                            wire:model="date" locale="es-ES" start-day="1" error="date" />
-
                         <flux:date-picker label="{{ __('sales.invoice_date') }}" size="sm"
                             wire:model="invoice_date" locale="es-ES" start-day="1" error="invoice_date" />
+
+                        <flux:date-picker label="{{ __('sales.expiration_date') }}" size="sm"
+                            wire:model="expiration_date" locale="es-ES" start-day="1" error="date" />
 
                         <flux:select size="sm" wire:model="state_id" variant="listbox"
                             label="{{ __('general.state') }}"

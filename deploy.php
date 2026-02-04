@@ -12,7 +12,7 @@ set('keep_releases', 3);
 
 add('shared_files', ['.env']);
 add('shared_dirs', []);
-add('writable_dirs', ['storage/logs', 'storage/app', 'storage/framework']);
+add('writable_dirs', ['storage/app/private']);
 
 // Hosts
 host('euromatica-pro')

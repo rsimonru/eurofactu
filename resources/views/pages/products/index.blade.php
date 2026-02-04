@@ -125,7 +125,7 @@ new class extends Component {
                                         size="sm"
                                         variant="danger"
                                         icon="trash"
-                                        x-on:click="$wire.showDeleteModal = true; $wire.deleteId = {{ $product->id }};"
+                                        x-on:click="$wire.showDeleteModal = true; $wire.deleteId={{ $product->id }};"
                                         tooltip="{{ __('general.delete') }}"
                                     />
                                 </div>
