@@ -1,5 +1,6 @@
 <?php
 
+use App\Classes\PdfFile;
 use App\Models\SalesNote;
 use App\Models\SalesNotesProduct;
 use App\Models\Select;
@@ -7,6 +8,8 @@ use Flux\Flux;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use App\Models\Thirdparty;
+use App\Notifications\SendCommercialDocument;
+use Illuminate\Support\Facades\Notification;
 
 new class extends Component {
     public ?SalesNote $note = null;
@@ -43,6 +46,10 @@ new class extends Component {
 
     public array $lines = [];
     public string $thirdparty_search = '';
+    public array $note_emails = [];
+    public array $selected_note_emails = [];
+    public string $new_note_email = '';
+    public bool $openSendEmail = false;
     public ?int $deleteId = null;
     public bool $showDeleteModal = false;
 
@@ -57,7 +64,7 @@ new class extends Component {
         if ($id) {
             $this->note = SalesNote::emtGet(
                 model_id: $id,
-                with: ['products']
+                with: ['products.sales_orders_product']
             );
             $this->isEditing = true;
             $this->loadNoteData();
@@ -205,6 +212,46 @@ new class extends Component {
         $this->loadLines();
     }
 
+    public function downloadPDF()
+    {
+        $pdf = new PdfFile();
+        $pdf->documents = $this->note;
+        $pdf->data = [
+            'company' => $this->note->company,
+            'products_summary' => $this->note ? $this->note->emtGetProductsSummary() : [],
+        ];
+        $data = $pdf->generateFromTemplate('pdf.sales_note');
+
+        return response()->streamDownload(
+            fn () => print($data),
+            __('sales.note').'-'.$this->note->number.'.pdf',
+            ['Content-Type' => 'application/pdf']
+        );
+    }
+    public function sendEmail()
+    {
+        if (length($this->selected_note_emails) == 0) {
+            Flux::toast(variant: 'danger', text: __('general.add_email'));
+            return;
+        }
+        $pdf = new PdfFile();
+        $pdf->documents = $this->note;
+        $pdf->data = [
+            'company' => $this->note->company,
+            'products_summary' => $this->note ? $this->note->emtGetProductsSummary() : [],
+        ];
+        $pdf_content = $pdf->generateFromTemplate('pdf.sales_note');
+
+        Notification::route('mail', $this->selected_note_emails)->notify(new SendCommercialDocument($this->note, $pdf_content));
+    }
+    public function createNoteEmail()
+    {
+        $validated = $this->validate([
+            'new_note_email' => 'required|email:rfc,dns',
+        ]);
+        $this->note_emails[] = $validated['new_note_email'];
+    }
+
     /**
      * Delete a line
      */
@@ -280,6 +327,14 @@ new class extends Component {
 <section class="w-full h-full">
     <x-document.layout :title="$pageTitle" :breadcrumbs="$breadcrumbs">
         <x-slot:buttons>
+            <flux:button type="button" size="sm" variant="primary" color="blue" icon="file-pdf" class="cursor-pointer" wire:click="downloadPDF">
+                <span class="hidden md:inline">PDF</span>
+            </flux:button>
+
+            <flux:button type="button" size="sm" variant="primary" color="blue" icon="envelope" class="cursor-pointer" x-on:click="$wire.openSendEmail = true">
+                <span class="hidden md:inline">Email</span>
+            </flux:button>
+
             <flux:button type="button" size="sm" variant="primary" icon="save" class="cursor-pointer" wire:click="save">
                 <span class="hidden md:inline">{{ __('general.save') }}</span>
             </flux:button>

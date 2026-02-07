@@ -179,18 +179,18 @@ class SalesNote extends Model
         if (empty($tax_types)) {
             $tax_types = TaxType::emtGet(records_in_page: -1, filters: ['tax_id' => $this->tax_id], with: ['tax'])->keyBy('id');
         }
-        $tax_summary = $this->products->where('units', '<>', 0)->groupBy('tax_type')
+        $tax_summary = $this->products->where('units', '<>', 0)->groupBy('sales_orders_product.tax_type')
             ->map(function ($items, $key) use ($tax_types) {
-                $base = $items->sum('base_line');
-                $tax = $items->sum('tax_line');
-                $es = $items->sum('es_line');
-                $total = $items->sum('total_line');
+                $base = $items->sum(function ($item) { return $item->units * $item->sales_orders_product->base_result; });
+                $tax = $items->sum(function ($item) { return $item->units * $item->sales_orders_product->base_result * $item->sales_orders_product->tax_type; });
+                $es = $items->sum(function ($item) { return $item->units * $item->sales_orders_product->base_result * $item->sales_orders_product->es_type; });
+                $total = $items->sum(function ($item) { return $item->units * $item->sales_orders_product->base_result * (1 + $item->sales_orders_product->tax_type + $item->sales_orders_product->es_type); });
                 return [
-                    'tax_name' => ($tax_types[$items->first()->tax_type_id]->tax->description . ' ' . $tax_types[$items->first()->tax_type_id]->type) ?? '',
+                    'tax_name' => ($tax_types[$items->first()->sales_orders_product->tax_type_id]->tax->description . ' ' . $tax_types[$items->first()->sales_orders_product->tax_type_id]->type) ?? '',
                     'tax_rate' => $key,
                     'base_line' => $base,
                     'tax_line' => $tax,
-                    'es_rate' => $items->first()->es_type,
+                    'es_rate' => $items->first()->sales_orders_product->es_type,
                     'es_line' => $es,
                     'total_line' => $total,
                     'retention' => $base * $this->tax_retention,
@@ -199,11 +199,11 @@ class SalesNote extends Model
 
         $summary = [
             'tax_summary' => $tax_summary,
-            'base_line' => $this->products->sum('base_line'),
-            'tax_line' => $this->products->sum('tax_line'),
-            'es_line' => $this->products->sum('es_line'),
-            'total_line' => $this->products->sum('total_line'),
-            'retention' => $this->products->sum('base_line') * $this->tax_retention,
+            'base_line' => $this->products->sum(function ($item) { return $item->units * $item->sales_orders_product->base_result; }),
+            'tax_line' => $this->products->sum(function ($item) { return $item->units * $item->sales_orders_product->base_result * $item->sales_orders_product->tax_type; }),
+            'es_line' => $this->products->sum(function ($item) { return $item->units * $item->sales_orders_product->base_result * $item->sales_orders_product->es_type; }),
+            'total_line' => $this->products->sum(function ($item) { return $item->units * $item->sales_orders_product->base_result * (1 + $item->sales_orders_product->tax_type + $item->sales_orders_product->es_type); }),
+            'retention' => $this->products->sum(function ($item) { return $item->units * $item->sales_orders_product->base_result; }) * $this->tax_retention,
         ];
 
         return $summary;

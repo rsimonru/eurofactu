@@ -103,7 +103,6 @@
     @php
         $retention = $document->tax_retention * $data['products_summary']['base_line'];
         $has_es = $data['products_summary']['es_line'] != 0 ? true : false;
-        $taxes = $document->products->groupBy('tax_type');
     @endphp
     <htmlpagefooter name="myFooter">
         <div class="document_div_totals">

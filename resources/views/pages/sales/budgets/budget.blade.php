@@ -11,7 +11,7 @@ use App\Classes\PdfFile;
 use App\Models\Product;
 use App\Models\ProductsVariant;
 use App\Models\Thirdparty;
-use App\Notifications\SendBudget;
+use App\Notifications\SendCommercialDocument;
 use Illuminate\Support\Facades\Notification;
 
 new class extends Component {
@@ -232,7 +232,7 @@ new class extends Component {
 
         return response()->streamDownload(
             fn () => print($data),
-            'Presupuesto-'.$this->budget->number.'.pdf',
+            __('sales.budget').'-'.$this->budget->number.'.pdf',
             ['Content-Type' => 'application/pdf']
         );
     }
@@ -250,7 +250,7 @@ new class extends Component {
         ];
         $data = $pdf->generateFromTemplate('pdf.sales_budget');
 
-        Notification::route('mail', $this->selected_budget_emails)->notify(new SendBudget($this->budget, $data));
+        Notification::route('mail', $this->selected_budget_emails)->notify(new SendCommercialDocument($this->budget, $data));
     }
     public function createBudgetEmail()
     {

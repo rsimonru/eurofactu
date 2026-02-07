@@ -84,7 +84,7 @@ class SalesNotesProduct extends Model
 
     public function sales_orders_product()
     {
-        return $this->belongsTo(SalesOrdersProduct::class, 'sales_order_product_id');
+        return $this->belongsTo(SalesOrdersProduct::class, 'sales_orders_product_id');
     }
 
     public function createdBy()

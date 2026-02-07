@@ -11,7 +11,7 @@ use App\Classes\PdfFile;
 use App\Models\Product;
 use App\Models\ProductsVariant;
 use App\Models\Thirdparty;
-use App\Notifications\SendBudget;
+use App\Notifications\SendCommercialDocument;
 use Illuminate\Support\Facades\Notification;
 
 new class extends Component {
@@ -237,7 +237,7 @@ new class extends Component {
         ];
         $data = $pdf->generateFromTemplate('pdf.sales_order');
 
-        Notification::route('mail', $this->selected_order_emails)->notify(new SendBudget($this->order, $data));
+        Notification::route('mail', $this->selected_order_emails)->notify(new SendCommercialDocument($this->order, $data));
     }
     public function createOrderEmail()
     {

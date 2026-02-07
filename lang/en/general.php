@@ -109,4 +109,10 @@ return [
     'variants' => 'Variant|Variants',
     'no_product_selected' => 'No product selected.',
     'no_variant_selected' => 'No variant selected.',
+
+    // Notifications
+    'hello' => 'Hello',
+    'send_commercial_document' => 'The document :number has been attached to this email.',
+    'send_commercial_document_subject' => 'Document :number',
+    'send_commercial_document_salutation' => 'Sincerely',
 ];

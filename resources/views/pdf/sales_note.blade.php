@@ -4,10 +4,10 @@
     {{ $document->number }}
 @endsection
 
-@section('document_type'){{ trans_choice('sales.invoices', 1) }}@endsection
+@section('document_type'){{ trans_choice('sales.notes', 1) }}@endsection
 
 @section('detail_of_document')
-    {{ __('sales.detail_of_invoice') }}
+    {{ __('sales.detail_of_note') }}
 @endsection
 
 @section('document_number')
@@ -15,37 +15,30 @@
 @endsection
 
 @section('document_data')
-    @if (!empty($document->invoice_date))
-        <div><strong>{{ __('sales.invoice_date') }}:</strong> {{ $document->invoice_date->format('d-m-Y') }}</div>
+    @if (!empty($document->date))
+        <div><strong>{{ __('general.date') }}:</strong> {{ $document->date->format('d-m-Y') }}</div>
     @endif
 
     @if (!empty($document->reference))
-        <div><strong>{{ __('sales.reference') }}:</strong> {{ $document->reference }}</div>
+        <div class="text-medium"><strong>{{ __('sales.reference') }}:</strong> {{ $document->reference }}</div>
     @endif
 
     @if (!empty($document->observations))
-        <div><strong>{{ __('sales.observations') }}:</strong> {{ $document->observations }}</div>
+        <div class="text-medium"><strong>{{ __('sales.observations') }}:</strong> {{ $document->observations }}</div>
     @endif
 @endsection
 
 @section('economics')
-    <div style="font-size: 12px">
+    <div>
         @if (!empty($document->expiration_date))
-        <div ><strong>{{ __('sales.expiration_date') }}:</strong> {{ $document->expiration_date->format('d-m-Y') }}</div><br>
+        <div class="text-medium"><strong>{{ __('sales.expiration_date') }}:</strong> {{ $document->expiration_date->format('d-m-Y') }}</div><br>
         @endif
-        <div><strong>{{ __('sales.payment_method') }}:</strong> Transferencia<br><br>{{ $data['company']->banks_account->iban }}</div>
+        <div class="text-medium"><strong>{{ __('sales.payment_method') }}:</strong> Transferencia<br><br>{{ $data['company']->banks_account->iban }}</div>
     </div>
 @endsection
 
-@section('verifactu_data')
-    <!-- <div class="qr-text" style="text-align: center;">{{ __('sales.qr_tax') }}:</div>
-    <barcode code="{{config('euromatica.verifactu.qr_base_url')}}?nif={{$document->vat}}&numserie={{$document->number}}&fecha={{$document->invoice_date->format('d-m-Y')}}&importe={{number_format($document->sales_invoices_products->sum('total_line'), 2, '.', '')}}"
-        type="QR" class="barcode" size="1.8" error="M"></barcode>
-    <div class="qr-text" style="text-align: center;">{{ __('sales.verifiable_invoice_at_aeat') }}</div> -->
-@endsection
-
 @section('thirdparty_data')
-    <div style="font-size: 13px;">
+    <div class="text-medium">
         <h2 style="font-size: 14px; padding-bottom:10px;">{{ __('sales.customer') }}</h2><br>
         <div><strong>{{ $document->thirdparty->legal_form }}</strong></div>
         <div>{{ $document->thirdparty->vat }}</div>
@@ -70,7 +63,7 @@
         </thead>
 
         <tbody>
-            @foreach ($document->sales_invoices_products as $line)
+            @foreach ($document->products as $line)
                 <tr>
                     <td style="height:20px;font-size: 11px;padding-left: 5px">
                         {{ $line->units != 0 ? $line->product_variant?->product?->reference : '***' }}
@@ -83,21 +76,21 @@
                             {{ decimal2string($line->units,'number0') }}
                         </td>
                         <td style="height:20px;font-size: 11px;padding-right: 5px;text-align: right">
-                            {{ decimal2string($line->base_unit) }}
+                            {{ decimal2string($line->sales_orders_product->base_unit) }}
                         </td>
                         <td style="height:20px;font-size: 11px;padding-right: 5px;text-align: right">
                             @if ($line->discount_type == 'P')
-                                {{ decimal2string($line->discountp,'percent2') }}
+                                {{ decimal2string($line->sales_orders_product->discountp,'percent2') }}
                             @else
-                                {{ decimal2string($line->discounti) }}
+                                {{ decimal2string($line->sales_orders_product->discounti) }}
                             @endif
                         </td>
                         <td style="height:20px;font-size: 11px;padding-right: 5px;text-align: right">
-                            {{ decimal2string($line->base_result) }}
+                            {{ decimal2string($line->sales_orders_product->base_result) }}
                         </td>
                     @endif
                     <td style="height:20px;font-size: 11px;padding-right: 5px;text-align: right">
-                        {{ $line->units != 0 ? decimal2string($line->base_line) : '***' }}
+                        {{ $line->units != 0 ? decimal2string($line->units * $line->sales_orders_product->base_result) : '***' }}
                     </td>
                 </tr>
             @endforeach

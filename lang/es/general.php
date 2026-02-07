@@ -109,4 +109,10 @@ return [
     'variants' => 'Variante|Variantes',
     'no_product_selected' => 'Sin producto',
     'no_variant_selected' => 'Sin variante',
+
+    // Notifications
+    'hello' => 'Hola',
+    'send_commercial_document' => 'Se adjunto el documento :number a este correo electrónico.',
+    'send_commercial_document_subject' => 'Documento :number',
+    'send_commercial_document_salutation' => 'Atentamente',
 ];
