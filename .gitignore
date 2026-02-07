@@ -480,3 +480,5 @@ package-lock.json
 
 public/build
 .github/workflows/deploy.yml
+
+auth.json
