@@ -1,5 +1,6 @@
 <?php
 
+use App\Classes\CommercialDocuments;
 use App\Models\SalesInvoice;
 use App\Traits\WithSorting;
 use Livewire\Component;
@@ -91,18 +92,26 @@ new class extends Component {
 
             $pdf = new PdfFile();
             if (length($invoices) === 1) {
+                $invoice = $invoices->first();
                 $pdf->zip = false;
-                $pdf->file_name = $invoices->first()->number;
-                $pdf->documents = $invoices->first();
+                $pdf->file_name = $invoice->number;
+                $pdf->documents = $invoice;
+                $pdf->data = [
+                    'company' => $invoice->company,
+                    'products_summary' => $invoice->emtGetProductsSummary(),
+                ];
             } else {
                 $pdf->zip = true;
                 $pdf->file_name = 'Factura';
                 $pdf->documents = $invoices;
+                $pdf->data = [
+                    'company' => $invoices->first()->company,
+                ];
+                $pdf->documents_data = [
+                    'products_summary' => CommercialDocuments::getProductsSummary($invoices, 'number'),
+                ];
             }
-            $pdf->data = [
-                'company' => $invoices->first()->company,
-            ];
-            $data = $pdf->generateFromTemplate('pdf.invoice');
+            $data = $pdf->generateFromTemplate('pdf.sales_invoice');
 
             if ($pdf->zip) {
                 return response()->streamDownload(

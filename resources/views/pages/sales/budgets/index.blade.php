@@ -1,5 +1,6 @@
 <?php
 
+use App\Classes\CommercialDocuments;
 use App\Models\SalesBudget;
 use App\Traits\WithSorting;
 use Livewire\Component;
@@ -91,18 +92,26 @@ new class extends Component {
 
             $pdf = new PdfFile();
             if (length($budgets) === 1) {
+                $budget = $budgets->first();
                 $pdf->zip = false;
-                $pdf->file_name = $budgets->first()->number;
-                $pdf->documents = $budgets->first();
+                $pdf->file_name = $budget->number;
+                $pdf->documents = $budget;
+                $pdf->data = [
+                    'company' => $budget->company,
+                    'products_summary' => $budget->emtGetProductsSummary(),
+                ];
             } else {
                 $pdf->zip = true;
                 $pdf->file_name = 'Presupuesto';
                 $pdf->documents = $budgets;
+                $pdf->data = [
+                    'company' => $budgets->first()->company,
+                ];
+                $pdf->documents_data = [
+                    'products_summary' => CommercialDocuments::getProductsSummary($budgets, 'number'),
+                ];
             }
-            $pdf->data = [
-                'company' => $budgets->first()->company,
-            ];
-            $data = $pdf->generateFromTemplate('pdf.budget');
+            $data = $pdf->generateFromTemplate('pdf.sales_budget');
 
             if ($pdf->zip) {
                 return response()->streamDownload(

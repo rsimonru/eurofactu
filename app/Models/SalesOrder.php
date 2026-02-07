@@ -111,7 +111,7 @@ class SalesOrder extends Model
     ) {
 
         $oQuery->when(isset($filters['sorder_ids']) && !empty($filters['sorder_ids']), function($query) use ($filters) {
-            return $query->whereIn('sales_orders.id', $filters['order_ids']);
+            return $query->whereIn('sales_orders.id', $filters['sorder_ids']);
         })
         ->when(isset($filters['state_id']) && !empty($filters['state_id']), function($query) use ($filters) {
             return $query->whereInto('sales_orders.state_id', $filters['state_id']);

@@ -85,27 +85,32 @@ new class extends Component {
             $orders = SalesOrder::emtGet(
                 records_in_page: -1,
                 filters: [
-                    'order_ids' => $this->selected,
+                    'sorder_ids' => $this->selected,
                 ],
                 with: ['company', 'thirdparty'],
             )->keyBy('number');
 
             $pdf = new PdfFile();
             if (length($orders) === 1) {
+                $order = $orders->first();
                 $pdf->zip = false;
-                $pdf->file_name = $orders->first()->number;
-                $pdf->documents = $orders->first();
+                $pdf->file_name = $order->number;
+                $pdf->documents = $order;
+                $pdf->data = [
+                    'company' => $order->company,
+                    'products_summary' => $order->emtGetProductsSummary(),
+                ];
             } else {
                 $pdf->zip = true;
                 $pdf->file_name = 'Pedido';
                 $pdf->documents = $orders;
+                $pdf->data = [
+                    'company' => $orders->first()->company,
+                ];
+                $pdf->documents_data = [
+                    'products_summary' => CommercialDocuments::getProductsSummary($orders, 'number'),
+                ];
             }
-            $pdf->data = [
-                'company' => $orders->first()->company,
-            ];
-            $pdf->documents_data = [
-                'products_summary' => CommercialDocuments::getProductsSummary($orders, 'number'),
-            ];
             $data = $pdf->generateFromTemplate('pdf.sales_order');
 
             if ($pdf->zip) {
