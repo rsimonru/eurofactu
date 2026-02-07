@@ -66,7 +66,7 @@
             @foreach ($document->products as $line)
                 <tr>
                     <td style="height:20px;font-size: 11px;padding-left: 5px">
-                        {{ $line->units != 0 ? $line->product_variant?->product?->reference : '***' }}
+                        {{ $line->units != 0 ? $line->sales_orders_product->product_variant?->product?->reference : '***' }}
                     </td>
                     <td style="height:20px;font-size: 11px;padding-left: 5px" colspan="{{ $line->units == 0 ? '5' : '1' }}" >
                         {{ $line->description }}

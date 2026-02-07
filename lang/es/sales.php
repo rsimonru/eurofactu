@@ -42,6 +42,7 @@
         'note_deleted' => 'Albarán eliminado correctamente',
         'note_lines_placeholder' => 'Las líneas del albarán estarán disponibles después de crear el albarán',
         'detail_of_note' => 'Detalle del albarán',
+        'select_notes' => 'Seleccione al menos un albarán',
 
         // Invoices
         'create_invoice' => 'Crear Factura',

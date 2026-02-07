@@ -219,7 +219,7 @@ class SalesOrder extends Model
             $this->tax_id = empty($this->tax_id) ? session('company')->tax_id ?? 1 : $this->tax_id;
             $this->fiscal_year = empty($this->fiscal_year) ? session('working_year', today()->format('Y')) : $this->fiscal_year;
 
-            $last_order = SalesOrder::where('fiscal_year', $this->fiscal_year)->where('company_id', $this->company_id)->orderBy('sequential', 'desc')->take(1)->get()->first();
+            $last_order = static::where('fiscal_year', $this->fiscal_year)->where('company_id', $this->company_id)->orderBy('sequential', 'desc')->take(1)->get()->first();
             if (empty($this->customer_date)) {
                 $this->customer_date = today();
             }

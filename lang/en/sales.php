@@ -42,6 +42,7 @@
         'note_deleted' => 'Delivery note deleted successfully',
         'note_lines_placeholder' => 'Delivery note lines will be available after creating the delivery note',
         'detail_of_note' => 'Detail of delivery note',
+        'select_notes' => 'Select at least one delivery note',
 
         // Invoices
         'create_invoice' => 'Create Invoice',

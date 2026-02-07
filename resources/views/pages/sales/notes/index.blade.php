@@ -1,5 +1,7 @@
 <?php
 
+use App\Classes\CommercialDocuments;
+use App\Classes\PdfFile;
 use App\Models\SalesNote;
 use App\Traits\WithSorting;
 use Livewire\Component;
@@ -76,6 +78,58 @@ new class extends Component {
         );
     }
 
+    public function downloadPDFs()
+    {
+        if ($this->selected) {
+            $notes = SalesNote::emtGet(
+                records_in_page: -1,
+                filters: [
+                    'snote_ids' => $this->selected,
+                ],
+                with: ['company', 'thirdparty'],
+            )->keyBy('number');
+
+            $pdf = new PdfFile();
+            if (length($notes) === 1) {
+                $note = $notes->first();
+                $pdf->zip = false;
+                $pdf->file_name = $note->number;
+                $pdf->documents = $note;
+                $pdf->data = [
+                    'company' => $note->company,
+                    'products_summary' => $note->emtGetProductsSummary(),
+                ];
+            } else {
+                $pdf->zip = true;
+                $pdf->file_name = 'Albaran';
+                $pdf->documents = $notes;
+                $pdf->data = [
+                    'company' => $notes->first()->company,
+                ];
+                $pdf->documents_data = [
+                    'products_summary' => CommercialDocuments::getProductsSummary($notes, 'number'),
+                ];
+            }
+            $data = $pdf->generateFromTemplate('pdf.sales_note');
+
+            if ($pdf->zip) {
+                return response()->streamDownload(
+                    fn () => print($data),
+                    'Albaranes.zip',
+                    ['Content-Type' => 'application/zip']
+                );
+            } else {
+                return response()->streamDownload(
+                    fn () => print($data),
+                    $pdf->file_name.'.pdf',
+                    ['Content-Type' => 'application/pdf']
+                );
+            }
+        } else {
+            Flux::toast(variant: 'danger', text: __('sales.select_notes'));
+        }
+    }
+
     public function doDelete(): void
     {
         if ($this->deleteId) {
@@ -104,6 +158,9 @@ new class extends Component {
         ]"
     >
         <x-slot:buttons>
+            <flux:button type="button" size="sm" variant="primary" color="blue" icon="file-pdf" class="cursor-pointer" wire:click="downloadPDFs">
+                <span class="hidden md:inline">PDF</span>
+            </flux:button>
             <flux:button type="button" size="sm" variant="primary" color="blue" icon="plus" href="{{ route('sales.notes.create') }}">
                 <span class="hidden md:inline">{{ __('general.new') }}</span>
             </flux:button>
