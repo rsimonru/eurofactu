@@ -180,10 +180,11 @@ class SalesInvoice extends Model
         return $oQuery->get()->first();
     }
 
-    public function emtGetProductsSummary()
+    public function emtGetProductsSummary($tax_types = null)
     {
-        $tax_types = TaxType::emtGet(records_in_page: -1, filters: ['tax_id' => $this->tax_id], with: ['tax'])
-            ->keyBy('id');
+        if (empty($tax_types)) {
+            $tax_types = TaxType::emtGet(records_in_page: -1, filters: ['tax_id' => $this->tax_id], with: ['tax'])->keyBy('id');
+        }
         $tax_summary = $this->sales_invoices_products->where('units', '<>', 0)->groupBy('tax_type')
             ->map(function ($items, $key) use ($tax_types) {
                 $base = $items->sum('base_line');

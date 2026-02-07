@@ -103,7 +103,7 @@ new class extends Component {
         $this->thirdparty_id = $this->order->thirdparty_id;
         $this->fiscal_year = $this->order->fiscal_year;
         $this->number = $this->order->number;
-        $this->date = $this->order->date->format('Y-m-d');
+        $this->date = $this->order->date?->format('Y-m-d');
         $this->customer_date = $this->order->customer_date->format('Y-m-d');
         $this->state_id = $this->order->state_id;
         $this->recipient = $this->order->recipient;
@@ -514,7 +514,7 @@ new class extends Component {
 
                         <flux:select size="sm" wire:model="state_id" variant="listbox"
                             label="{{ __('general.state') }}"
-                            searchable placeholder="{{ __('general.select') }}"
+                            placeholder="{{ __('general.select') }}"
                             error="state_id">
                             <x-slot name="search">
                                 <flux:select.search class="px-4" placeholder="{{ __('general.search') }}" />

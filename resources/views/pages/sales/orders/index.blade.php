@@ -1,5 +1,6 @@
 <?php
 
+use App\Classes\CommercialDocuments;
 use App\Models\SalesOrder;
 use App\Traits\WithSorting;
 use Livewire\Component;
@@ -102,7 +103,10 @@ new class extends Component {
             $pdf->data = [
                 'company' => $orders->first()->company,
             ];
-            $data = $pdf->generateFromTemplate('pdf.order');
+            $pdf->documents_data = [
+                'products_summary' => CommercialDocuments::getProductsSummary($orders, 'number'),
+            ];
+            $data = $pdf->generateFromTemplate('pdf.sales_order');
 
             if ($pdf->zip) {
                 return response()->streamDownload(

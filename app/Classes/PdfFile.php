@@ -11,6 +11,7 @@ class PdfFile {
 
     public $templates = [];
     public $documents = [];
+    public $documents_data = [];
     public $data = [];
     public $file_name = 'document';
     public $multi_record = false;
@@ -114,15 +115,16 @@ class PdfFile {
             if ($zip->open($zipurl, \ZipArchive::CREATE) !== TRUE) {
                 exit("cannot open <$zipurl>\n");
             }
-
             foreach ($this->documents as $record_key => $document) {
-                // $pdf = LaravelMpdf::loadView($template,  ['document' => $document, 'data' => $this->data], [
-                //     'margin_left'=> ($sign) ? 15:$pdf_config['margin_left'],
-                //     'margin_top'=> ($this->header_footer) ? $pdf_config['margin_top']:5,
-                //     'margin_bottom'=> ($this->header_footer) ? $pdf_config['margin_bottom']:5,
-                //     'author'=> 'Eurofactu',
-                // ]);
-                $pdf_html = view($template, ['document' => $document, 'data' => $this->data])->render();
+                foreach ($this->documents_data as $key => $value) {
+                    if (isset($value[$record_key])) {
+                       $this->data[$key] = $value[$record_key];
+                    }
+                }
+                $pdf_html = view($template, [
+                    'document' => $document,
+                    'data' => $this->data,
+                ])->render();
                 $pdf = LaravelMpdf::loadHtml($pdf_html,[
                     'margin_left'=> ($sign) ? 15:$pdf_config['margin_left'],
                     'margin_top'=> ($this->header_footer) ? $pdf_config['margin_top']:5,
@@ -150,12 +152,6 @@ class PdfFile {
             //dd($this->file_name);
             return $zip_content;
         } else {
-            // $pdf = LaravelMpdf::loadView($template, ['document' => $this->documents, 'data' => $this->data], [
-            //     'margin_left'=> ($sign) ? 15:$pdf_config['margin_left'],
-            //     'margin_top'=> ($this->header_footer) ? $pdf_config['margin_top']:5,
-            //     'margin_bottom'=> ($this->header_footer) ? $pdf_config['margin_bottom']:5,
-            //     'author'=> 'Eurofactu',
-            // ]);
             $pdf_html = view($template, ['document' => $this->documents, 'data' => $this->data])->render();
             // dd($pdf_html);
             $pdf = LaravelMpdf::loadHtml($pdf_html,[

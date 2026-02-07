@@ -143,11 +143,13 @@ class Select extends Model
                     ->when(!empty($parameter1), function ($query) use ($parameter1) {
                         $query->join('states_models as sm', function ($join) use ($parameter1) {
                             $join->on( 'sm.states_id', 'states.id')
-                                ->where('sm.model', $parameter1)
-                                ->orderBy('sm.order', 'asc');
-                        });
+                                ->where('sm.model', $parameter1);
+                        })
+                        ->orderBy('sm.order', 'asc');
                     })
-                    ->orderBy('states.description->'.app()->getLocale(), 'asc')
+                    ->when(empty($parameter1), function ($query) {
+                        $query->orderBy('states.description->'.app()->getLocale(), 'asc');
+                    })
                     ->get()->toArray();
                 break;
             case "tax_types":

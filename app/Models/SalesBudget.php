@@ -177,10 +177,11 @@ class SalesBudget extends Model
             return $oQuery->get()->first();
         }
     }
-    public function emtGetProductsSummary()
+    public function emtGetProductsSummary($tax_types = null)
     {
-        $tax_types = TaxType::emtGet(records_in_page: -1, filters: ['tax_id' => $this->tax_id], with: ['tax'])
-            ->keyBy('id');
+        if (empty($tax_types)) {
+            $tax_types = TaxType::emtGet(records_in_page: -1, filters: ['tax_id' => $this->tax_id], with: ['tax'])->keyBy('id');
+        }
         $tax_summary = $this->products->where('units', '<>', 0)->groupBy('tax_type')
             ->map(function ($items, $key) use ($tax_types) {
                 $base = $items->sum('base_line');
@@ -241,6 +242,7 @@ class SalesBudget extends Model
         $order->company_id = $this->company_id;
         $order->thirdparty_id = $this->thirdparty_id;
         $order->sales_budget_id = $this->id;
+        $order->date = today();
         $order->customer_date = $customer_date ? $customer_date : today();
         $order->state_id = config('constants.states.open');
         $order->tax_retention = $this->tax_retention;
@@ -279,7 +281,7 @@ class SalesBudget extends Model
                 $order_product->es_type = $budget_product->es_type;
                 $order_product->es_unit = $budget_product->es_unit;
                 $order_product->es_line = $budget_product->es_unit * $units;
-                $order_product->base_line = $budget_product->base_unit * $units;
+                $order_product->base_line = $budget_product->base_result * $units;
                 $order_product->total_line = $order_product->base_line + $order_product->tax_line + $order_product->es_line;
                 $order_product->save();
             }

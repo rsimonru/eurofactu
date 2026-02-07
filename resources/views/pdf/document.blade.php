@@ -85,6 +85,13 @@
         padding-top: 0px;
     }
 
+    .text-small {
+        font-size: 10px;
+    }
+    .text-medium {
+        font-size: 12px;
+    }
+
     .col-print-1 {
         width: 8%;
         float: left;

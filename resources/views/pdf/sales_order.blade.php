@@ -4,9 +4,7 @@
     {{ $document->number }}
 @endsection
 
-@section('document_type')
-    {{ trans_choice('sales.orders', 1) }}
-@endsection
+@section('document_type'){{ trans_choice('sales.orders', 1) }}@endsection
 
 @section('detail_of_document')
     {{ __('sales.detail_of_order') }}
@@ -17,44 +15,50 @@
 @endsection
 
 @section('document_data')
-    @if (!empty($document->customer_date))
-        <div><strong>{{ __('sales.customer_date') }}:</strong> {{ $document->customer_date->format('d-m-Y') }}</div>
+    @if (!empty($document->date))
+        <div><strong>{{ __('general.date') }}:</strong> {{ $document->date->format('d-m-Y') }}</div>
     @endif
 
     @if (!empty($document->reference))
-        <div><strong>{{ __('sales.reference') }}:</strong> {{ $document->reference }}</div>
+        <div class="text-medium"><strong>{{ __('sales.reference') }}:</strong> {{ $document->reference }}</div>
     @endif
 
     @if (!empty($document->observations))
-        <div><strong>{{ __('sales.observations') }}:</strong> {{ $document->observations }}</div>
+        <div class="text-medium"><strong>{{ __('sales.observations') }}:</strong> {{ $document->observations }}</div>
     @endif
 @endsection
 
 @section('economics')
-    <h4 style="font-size: 12px;font-weight: bold">Condiciones Ecónomicas</h4>
-    <div class="span4" style="font-size: 11px"><strong>Forma de pago:</strong> Datos de forma de pago</div>
+    <div>
+        @if (!empty($document->expiration_date))
+        <div class="text-medium"><strong>{{ __('sales.expiration_date') }}:</strong> {{ $document->expiration_date->format('d-m-Y') }}</div><br>
+        @endif
+        <div class="text-medium"><strong>{{ __('sales.payment_method') }}:</strong> Transferencia<br><br>{{ $data['company']->banks_account->iban }}</div>
+    </div>
 @endsection
 
 @section('thirdparty_data')
-    <h4 style="font-size: 12px;font-weight: bold">{{ __('sales.customer') }}</h4>
-    <div class="span4" style="font-size: 11px"><strong>{{ $document->thirdparty->legal_form }}</strong></div>
-    <div class="span4" style="font-size: 11px">{{ $document->thirdparty->vat }}</div>
-    <div class="span4" style="font-size: 11px">{{ $document->thirdparty->address }}</div>
-    <div style="font-size: 11px">{{ $document->thirdparty->zip }} - {{ $document->thirdparty->town }}</div>
-    <div class="span4" style="font-size: 11px">{{ $document->thirdparty->province }}</div>
+    <div class="text-medium">
+        <h2 style="font-size: 14px; padding-bottom:10px;">{{ __('sales.customer') }}</h2><br>
+        <div><strong>{{ $document->thirdparty->legal_form }}</strong></div>
+        <div>{{ $document->thirdparty->vat }}</div>
+        <div>{{ $document->thirdparty->address }}</div>
+        <div>{{ $document->thirdparty->zip }} - {{ $document->thirdparty->town }}</div>
+        <div>{{ $document->thirdparty->province }}</div>
+    </div>
 @endsection
 
 @section('table_data')
-    <table style="width:100%" class="table-striped table-bordered">
+    <table style="width:100%" class="table-data table-striped">
         <thead>
             <tr style="background-color: #e7e7e7">
-                <th style="height:20px;font-size: 11px;padding-left: 5px;text-align: center;width:14%;">Código</th>
-                <th style="width:39%;text-align: center;">Descripción</th>
-                <th style="width:10%;text-align: center;">Unid.</th>
-                <th style="width:10%;text-align: center;">P/U</th>
-                <th style="width:10%;text-align: center;">Desc.</th>
-                <th style="width:10%;text-align: center;">Total/U</th>
-                <th style="width:10%;text-align: center;">Total</th>
+                <th style="height:20px;font-size: 11px;padding-left: 5px;text-align: center;width:14%;">{{ __('general.code') }}</th>
+                <th style="width:39%;text-align: center;">{{ __('sales.description') }}</th>
+                <th style="width:10%;text-align: center;">{{ __('sales.short_units') }}</th>
+                <th style="width:10%;text-align: center;">{{ __('general.price') }}</th>
+                <th style="width:10%;text-align: center;">{{ __('sales.discount') }}</th>
+                <th style="width:10%;text-align: center;">{{ __('general.net') }}</th>
+                <th style="width:10%;text-align: center;">{{ __('sales.total') }}</th>
             </tr>
         </thead>
 
@@ -106,7 +110,7 @@
             <div class="div-table">
                 <table class="table-totals table-bordered" style="page-break-inside: avoid ">
                     <thead>
-                        <tr>
+                        <tr class="table-bordered">
                             <th>{{ __('general.base') }}</th>
                             <th>% {{ __('general.vat') }}</th>
                             <th>{{ __('general.vat') }}</th>
@@ -169,16 +173,13 @@
                 </table>
             </div>
 
-            {{-- @section('footer_company_data') --}}
-                <div class="company-information">
-                    <strong>{{ $data['company']->legal_form }}</strong>&nbsp;&nbsp;{{ $data['company']->address }}&nbsp;/&nbsp;{{ $data['company']->zip }}&nbsp;&nbsp;{{ $data['company']->town }}&nbsp;-&nbsp;{{ $data['company']->province }}<br>
-                    {{ $data['company']->vat }}<br>
-                    {{ $data['company']->register }}
-                </div>
-                <div style="width: 100%;margin-top: 10px;font-size: 9px;" class="text-center vertical-text">
-                    Info adicional.
-                </div>
-            {{-- @endsection --}}
+            <div class="company-information">
+                <strong>{{ $data['company']->legal_form }}</strong>&nbsp;##&nbsp;{{ $data['company']->address }}&nbsp;##&nbsp;{{ $data['company']->zip }}&nbsp;&nbsp;{{ $data['company']->town }}&nbsp;##&nbsp;{{ $data['company']->province }} &nbsp;##&nbsp; {{ $data['company']->vat }}<br>
+                {{ $data['company']->register }}
+            </div>
+            <div style="width: 100%;margin-top: 10px;font-size: 9px;" class="text-center vertical-text">
+
+            </div>
 
         </div>
     </htmlpagefooter>
